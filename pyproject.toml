@@ -1,0 +1,30 @@
+[project]
+name = "pyvista-demos"
+version = "0.1.0"
+description = "Transparent scientific 3D PNG scenes rendered with PyVista and VTK"
+requires-python = ">=3.12"
+dependencies = [
+  "numpy>=2.3,<3",
+  "pillow>=11.3,<13",
+  "pyvista>=0.46,<0.47",
+  "vtk>=9.5,<9.6",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.4,<10", "ruff>=0.12,<1"]
+
+[project.scripts]
+render-pyvista-demos = "pyvista_demos.render:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pyvista_demos"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 110
