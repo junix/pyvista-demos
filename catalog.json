@@ -1,0 +1,14 @@
+[
+  {"id":"spectral-terrain","use":"terrain analysis","question":"How do multi-frequency components shape a surface?","family":"3D surface","complexity":"advanced","tags":["pyvista","terrain","contours"]},
+  {"id":"vortex-streamlines","use":"fluid dynamics","question":"How does a 3D vortex transport seeded particles?","family":"streamlines","complexity":"advanced","tags":["pyvista","CFD","vectors"]},
+  {"id":"wave-isosurface","use":"wave physics","question":"Where do two spherical sources interfere?","family":"isosurface","complexity":"advanced","tags":["pyvista","volume","waves"]},
+  {"id":"gyroid-lattice","use":"materials engineering","question":"How does a bicontinuous lattice partition volume?","family":"implicit surface","complexity":"advanced","tags":["pyvista","gyroid","materials"]},
+  {"id":"finite-element-stress","use":"structural engineering","question":"Where does a loaded cantilever concentrate stress?","family":"FEA","complexity":"advanced","tags":["pyvista","stress","mesh"]},
+  {"id":"molecular-orbitals","use":"computational chemistry","question":"How do molecular geometry and orbital lobes align?","family":"molecular scene","complexity":"advanced","tags":["pyvista","chemistry","orbitals"]},
+  {"id":"classified-point-cloud","use":"remote sensing","question":"How are ground, canopy, and structures separated?","family":"point cloud","complexity":"advanced","tags":["pyvista","lidar","classification"]},
+  {"id":"planetary-routes","use":"global networks","question":"How do elevated routes connect distributed stations?","family":"globe","complexity":"advanced","tags":["pyvista","geodesic","routes"]},
+  {"id":"tensor-glyphs","use":"diffusion analysis","question":"How do principal directions vary through a volume?","family":"glyph field","complexity":"advanced","tags":["pyvista","tensor","glyphs"]},
+  {"id":"vascular-tree","use":"biomedical visualization","question":"How does radius taper through a branching vessel tree?","family":"branching tubes","complexity":"advanced","tags":["pyvista","vascular","biomedical"]},
+  {"id":"seismic-slices","use":"geophysics","question":"Where do layered signals break across a fault?","family":"volume slices","complexity":"advanced","tags":["pyvista","seismic","slices"]},
+  {"id":"urban-airflow","use":"urban climate","question":"How do wind corridors pass through a building canopy?","family":"3D flow scene","complexity":"advanced","tags":["pyvista","urban","airflow"]}
+]
