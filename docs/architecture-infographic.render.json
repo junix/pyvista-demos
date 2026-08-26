@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "project": "pyvista-demos",
+  "infographic_type": "architecture-narrative",
+  "language": "zh-CN",
+  "thesis": "使用 PyVista/VTK 离屏渲染 12 个跨学科三维科学场景，以透明 PNG 为主要交付物，所有场景采用确定性数据场与固定相机视角，确保可复现的高质量视觉输出。",
+  "source": {
+    "file": "architecture-infographic.tex",
+    "backend": "TikZ / XeLaTeX",
+    "size_bytes": 19027,
+    "sha256": "23712580154ed31f2cffb953eb24beb70f5f680aa37e749bb0da4ba222fc71f6"
+  },
+  "outputs": {
+    "svg": {
+      "file": "architecture-infographic.svg",
+      "size_bytes": 1579017,
+      "width_pt": 506,
+      "height_pt": 785,
+      "sha256": "23c572036bb637a114208f6f669569aa70eb0466c470f8d2c52188b911238367"
+    },
+    "png": {
+      "file": "architecture-infographic.png",
+      "size_bytes": 277105,
+      "width_px": 1056,
+      "height_px": 1720,
+      "dpi": 150,
+      "sha256": "a0ac352407c1a22d97dfb0718ea3fd3621b9d892eac754b182bb1e27c8d7cd68"
+    },
+    "pdf": {
+      "file": "architecture-infographic.pdf",
+      "size_bytes": 158480,
+      "pages": 1,
+      "sha256": "b25134ec96e0c3ed428199766dee91d79b739ee3f90448eb8b319a730d0f9029"
+    }
+  },
+  "narrative_sections": [
+    {
+      "id": "title",
+      "role": "header",
+      "content": "PyVista Demos — 科学三维可视化参考场景集"
+    },
+    {
+      "id": "thesis",
+      "role": "hero_claim",
+      "content": "12 个跨学科三维科学场景，离屏渲染透明 PNG，确定性数据场与固定相机确保可复现输出"
+    },
+    {
+      "id": "architecture_layers",
+      "role": "system_architecture",
+      "layers": [
+        "配置层 (catalog.json 元数据)",
+        "场景构建层 (12 个 BUILDERS)",
+        "渲染引擎层 (PyVista/VTK 离屏)"
+      ]
+    },
+    {
+      "id": "render_pipeline",
+      "role": "process_flow",
+      "steps": [
+        "numpy 数据场",
+        "几何网格 (StructGrid/ImageData)",
+        "标量映射 (scalars/cmap)",
+        "视角固定 (camera_position)",
+        "离屏截图 (screenshot)",
+        "RGBA 验证 (validate_png)"
+      ],
+      "output": "out/*-transparent.png"
+    },
+    {
+      "id": "visual_families",
+      "role": "classification",
+      "families": [
+        "地表与体积",
+        "流动与矢量",
+        "结构与材料",
+        "遥感与地理",
+        "隐式几何",
+        "分支与网络"
+      ]
+    },
+    {
+      "id": "key_metrics",
+      "role": "kpi_panel",
+      "metrics": [
+        { "label": "科学场景", "value": "12" },
+        { "label": "主色调", "value": "5" },
+        { "label": "输出分辨率", "value": "1600x1000" },
+        { "label": "验证维度", "value": "3" }
+      ]
+    },
+    {
+      "id": "quality_contract",
+      "role": "verification",
+      "checks": [
+        "透明度验证 (透明像素 >= 6%)",
+        "可见性验证 (可见像素 >= 3.5%)",
+        "色彩丰富度 (彩色像素 > 2500)"
+      ]
+    }
+  ],
+  "color_palette": {
+    "bg_deep": "#07111f",
+    "teal": "#54d6c6",
+    "gold": "#ffd166",
+    "pink": "#ff6f91",
+    "blue": "#7b9cff",
+    "purple": "#b889ff",
+    "note": "取自项目 render.py PALETTE 常量"
+  },
+  "provenance": {
+    "data_sources": [
+      "README.md: 项目描述与使用方式",
+      "catalog.json: 12 个场景元数据",
+      "pyproject.toml: 依赖版本与项目配置",
+      "src/pyvista_demos/render.py: 渲染管线与场景构建器",
+      "tests/test_contract.py: 验证契约"
+    ]
+  },
+  "build": {
+    "tex_engine": "xelatex",
+    "tex_command": "xelatex -interaction=nonstopmode architecture-infographic.tex",
+    "svg_command": "pdf2svg architecture-infographic.pdf architecture-infographic.svg",
+    "png_command": "pdftoppm -png -r 150 architecture-infographic.pdf architecture-infographic",
+    "fonts": [
+      "MiSans-Normal (中文标题/正文)",
+      "FandolSong-Regular (中文宋体正文)",
+      "Courier New (等宽)"
+    ]
+  },
+  "verification": {
+    "compilation": "success",
+    "no_text_clip": true,
+    "no_glyph_missing": true,
+    "cjk_rendered": true,
+    "layout_sections_distinct": true,
+    "no_overlap": true
+  },
+  "rendered_at": "2026-08-24"
+}

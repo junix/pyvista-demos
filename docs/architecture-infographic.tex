@@ -1,0 +1,406 @@
+\documentclass[tikz,border=4pt,10pt]{standalone}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{
+  positioning,
+  calc,
+  shapes.geometric,
+  shapes.misc,
+  shapes.arrows,
+  arrows.meta,
+  fit,
+  backgrounds,
+  decorations.pathreplacing,
+  decorations.pathmorphing,
+  decorations.text,
+  shadows,
+}
+
+% ============================================================
+% 字体设置
+% ============================================================
+\newfontfamily\zhfont[Path=/Users/junix/Library/Fonts/]{MiSans-Normal.ttf}
+\newfontfamily\zhheiti[Path=/Users/junix/Library/Fonts/]{MiSans-Normal.ttf}
+\newfontfamily\zhsongti[Path=/Library/TeX/Root/texmf-dist/fonts/opentype/public/fandol/]{FandolSong-Regular.otf}
+\setmainfont{FandolSong-Regular.otf}[Path=/Library/TeX/Root/texmf-dist/fonts/opentype/public/fandol/]
+\setmonofont{Courier New}
+
+% ============================================================
+% 颜色系统 — 取自项目 PALETTE 并扩展
+% ============================================================
+\definecolor{bgDeep}{HTML}{07111f}
+\definecolor{bgMid}{HTML}{0d1f35}
+\definecolor{bgLight}{HTML}{142d4c}
+\definecolor{teal}{HTML}{54d6c6}
+\definecolor{gold}{HTML}{ffd166}
+\definecolor{pink}{HTML}{ff6f91}
+\definecolor{blue}{HTML}{7b9cff}
+\definecolor{purple}{HTML}{b889ff}
+\definecolor{textPrimary}{HTML}{edf8ff}
+\definecolor{textSecondary}{HTML}{82a0b5}
+\definecolor{textMuted}{HTML}{5a7a94}
+\definecolor{accentBorder}{HTML}{2a4a6b}
+\definecolor{panelBg}{HTML}{0a1a2e}
+
+% ============================================================
+% 尺寸定义
+% ============================================================
+\def\pageW{500}
+\def\pageH{820}
+
+\begin{document}
+\begin{tikzpicture}[
+  x=1pt, y=1pt,
+  every node/.style={inner sep=0, outer sep=0},
+  panel/.style={
+    fill=panelBg,
+    draw=accentBorder,
+    rounded corners=6pt,
+    line width=0.8pt,
+  },
+  arrowFlow/.style={
+    -{Stealth[length=5pt, width=4pt]},
+    teal!70,
+    line width=1.2pt,
+  },
+]
+
+% ============================================================
+% 背景
+% ============================================================
+\fill[bgDeep] (0,0) rectangle (\pageW,\pageH);
+
+% 装饰性网格点
+\foreach \x in {20,40,...,\pageW} {
+  \foreach \y in {20,40,...,\pageH} {
+    \fill[bgLight!25] (\x,\y) circle (0.35);
+  }
+}
+
+% 顶部渐变光带
+\fill[left color=bgDeep, right color=bgDeep, middle color=teal!12]
+  (0, \pageH-25) rectangle (\pageW, \pageH);
+
+% ============================================================
+% 标题区 (y from top)
+% ============================================================
+\node[text=textPrimary, font=\zhheiti\bfseries\Huge, anchor=north west]
+  (titleMain) at (24, \pageH-28) {PyVista Demos};
+\node[text=teal, font=\zhheiti\large, anchor=north west]
+  (subtitleMain) at (24, \pageH-60) {科学三维可视化参考场景集};
+\node[text=textSecondary, font=\zhfont\small, anchor=north west]
+  (engSub) at (24, \pageH-82) {12 Transparent Scientific 3D Scenes \,$\cdot$\, PyVista / VTK Off-Screen Rendering};
+
+% 装饰线
+\draw[teal!50, line width=1.5pt] (24, \pageH-100) -- (\pageW-24, \pageH-100);
+\draw[teal!15, line width=0.5pt] (24, \pageH-102) -- (\pageW-24, \pageH-102);
+
+% ============================================================
+% 核心命题卡
+% ============================================================
+\node[panel, minimum width=452pt, minimum height=58pt, anchor=north]
+  (thesisCard) at (\pageW/2, \pageH-118) {};
+\node[text=teal, font=\zhheiti\bfseries, anchor=north west]
+  at ($(thesisCard.north west)+(12,-8)$) {核心命题};
+\node[text=textSecondary, font=\zhsongti\small, text width=428pt, anchor=north west, align=left]
+  at ($(thesisCard.north west)+(12,-28)$)
+  {使用 PyVista/VTK 离屏渲染 12 个跨学科三维科学场景，以透明 PNG 为主要交付物；所有场景采用确定性数据场与固定相机视角，确保可复现的高质量视觉输出。};
+
+% ============================================================
+% 架构三层图
+% ============================================================
+\node[text=textPrimary, font=\zhheiti\bfseries\Large, anchor=north west]
+  (archTitle) at (24, \pageH-200) {系统架构};
+
+% 计算三层 x 位置
+\pgfmathsetmacro\layerW{148}
+\pgfmathsetmacro\layerGap{(\pageW - 48 - 3*\layerW) / 2}
+\pgfmathsetmacro\layerOneX{24}
+\pgfmathsetmacro\layerTwoX{24 + \layerW + \layerGap}
+\pgfmathsetmacro\layerThreeX{24 + 2*(\layerW + \layerGap)}
+
+% 层 1: 配置层
+\node[panel, minimum width=\layerW pt, minimum height=56pt, anchor=north west]
+  (layer1) at (\layerOneX, \pageH-220) {};
+\node[text=gold, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(layer1.north west)+(10,-7)$) {配置层};
+\node[text=textSecondary, font=\zhsongti\footnotesize, text width=\layerW-20 pt, anchor=north west, align=left]
+  at ($(layer1.north west)+(10,-24)$)
+  {\texttt{catalog.json}\\[3pt]场景元数据：用途 / 问题 / 视觉族 / 标签};
+
+% 层 2: 场景构建层 (更高)
+\node[panel, minimum width=\layerW pt, minimum height=120pt, anchor=north west]
+  (layer2) at (\layerTwoX, \pageH-220) {};
+\node[text=teal, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(layer2.north west)+(10,-7)$) {场景构建层};
+\node[text=textMuted, font=\zhfont\scriptsize, anchor=north east]
+  at ($(layer2.north east)+(-10,-9)$) {12 BUILDERS};
+\node[text=textSecondary, font=\zhsongti\scriptsize, text width=\layerW-20 pt, anchor=north west, align=left]
+  at ($(layer2.north west)+(10,-26)$)
+  {
+  \textcolor{teal}{$\bullet$} 地表地形 \hfill \textcolor{gold}{$\bullet$} 涡旋流线\\
+  \textcolor{pink}{$\bullet$} 波场等值面 \hfill \textcolor{blue}{$\bullet$} 螺旋点阵\\
+  \textcolor{purple}{$\bullet$} 有限元应力 \hfill \textcolor{teal}{$\bullet$} 分子轨道\\
+  \textcolor{gold}{$\bullet$} 激光点云 \hfill \textcolor{pink}{$\bullet$} 行星路线\\
+  \textcolor{blue}{$\bullet$} 张量字形 \hfill \textcolor{purple}{$\bullet$} 血管树\\
+  \textcolor{teal}{$\bullet$} 地震切片 \hfill \textcolor{gold}{$\bullet$} 城市气流
+  };
+
+% 层 3: 渲染引擎层
+\node[panel, minimum width=\layerW pt, minimum height=56pt, anchor=north west]
+  (layer3) at (\layerThreeX, \pageH-220) {};
+\node[text=pink, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(layer3.north west)+(10,-7)$) {渲染引擎层};
+\node[text=textSecondary, font=\zhsongti\footnotesize, text width=\layerW-20 pt, anchor=north west, align=left]
+  at ($(layer3.north west)+(10,-24)$)
+  {PyVista 0.46 / VTK 9.5\\[3pt]离屏 \,$\cdot$\, 固定相机 \,$\cdot$\, 透明背景};
+
+% 箭头
+\draw[arrowFlow] (layer1.east) -- (layer2.west)
+  node[midway, above, text=textMuted, font=\zhfont\tiny, inner sep=1pt] {注册};
+\draw[arrowFlow] (layer3.west) -- (layer2.east)
+  node[midway, above, text=textMuted, font=\zhfont\tiny, inner sep=1pt] {Plotter};
+
+% ============================================================
+% 渲染管线
+% ============================================================
+\node[text=textPrimary, font=\zhheiti\bfseries\Large, anchor=north west]
+  (pipeTitle) at (24, \pageH-370) {渲染管线};
+
+\pgfmathsetmacro\pipeY{\pageH - 395}
+\pgfmathsetmacro\pipeStepW{74}
+\pgfmathsetmacro\pipeStepH{46}
+\pgfmathsetmacro\pipeGap{6}
+\pgfmathsetmacro\pipeTotalW{6*\pipeStepW + 5*\pipeGap}
+\pgfmathsetmacro\pipeStartX{(\pageW - \pipeTotalW) / 2}
+
+% 步骤 1
+\pgfmathsetmacro\sOneX{\pipeStartX}
+\node[panel, minimum width=\pipeStepW pt, minimum height=\pipeStepH pt, anchor=north west, fill=bgMid]
+  (s1) at (\sOneX, \pipeY) {};
+\node[text=textPrimary, font=\zhheiti\bfseries\scriptsize, anchor=north] at ($(s1.north)+(0,-6)$) {数据场};
+\node[text=gold, font=\ttfamily\tiny, anchor=south] at ($(s1.south)+(0,6)$) {numpy};
+
+% 步骤 2
+\pgfmathsetmacro\sTwoX{\pipeStartX + \pipeStepW + \pipeGap}
+\node[panel, minimum width=\pipeStepW pt, minimum height=\pipeStepH pt, anchor=north west, fill=bgMid]
+  (s2) at (\sTwoX, \pipeY) {};
+\node[text=textPrimary, font=\zhheiti\bfseries\scriptsize, anchor=north] at ($(s2.north)+(0,-6)$) {几何网格};
+\node[text=gold, font=\ttfamily\tiny, anchor=south] at ($(s2.south)+(0,6)$) {StructGrid};
+
+% 步骤 3
+\pgfmathsetmacro\sThreeX{\pipeStartX + 2*(\pipeStepW + \pipeGap)}
+\node[panel, minimum width=\pipeStepW pt, minimum height=\pipeStepH pt, anchor=north west, fill=bgMid]
+  (s3) at (\sThreeX, \pipeY) {};
+\node[text=textPrimary, font=\zhheiti\bfseries\scriptsize, anchor=north] at ($(s3.north)+(0,-6)$) {标量映射};
+\node[text=gold, font=\ttfamily\tiny, anchor=south] at ($(s3.south)+(0,6)$) {scalars};
+
+% 步骤 4
+\pgfmathsetmacro\sFourX{\pipeStartX + 3*(\pipeStepW + \pipeGap)}
+\node[panel, minimum width=\pipeStepW pt, minimum height=\pipeStepH pt, anchor=north west, fill=bgMid]
+  (s4) at (\sFourX, \pipeY) {};
+\node[text=textPrimary, font=\zhheiti\bfseries\scriptsize, anchor=north] at ($(s4.north)+(0,-6)$) {视角固定};
+\node[text=gold, font=\ttfamily\tiny, anchor=south] at ($(s4.south)+(0,6)$) {camera};
+
+% 步骤 5
+\pgfmathsetmacro\sFiveX{\pipeStartX + 4*(\pipeStepW + \pipeGap)}
+\node[panel, minimum width=\pipeStepW pt, minimum height=\pipeStepH pt, anchor=north west, fill=bgMid]
+  (s5) at (\sFiveX, \pipeY) {};
+\node[text=textPrimary, font=\zhheiti\bfseries\scriptsize, anchor=north] at ($(s5.north)+(0,-6)$) {离屏截图};
+\node[text=gold, font=\ttfamily\tiny, anchor=south] at ($(s5.south)+(0,6)$) {screenshot};
+
+% 步骤 6
+\pgfmathsetmacro\sSixX{\pipeStartX + 5*(\pipeStepW + \pipeGap)}
+\node[panel, minimum width=\pipeStepW pt, minimum height=\pipeStepH pt, anchor=north west, fill=bgMid]
+  (s6) at (\sSixX, \pipeY) {};
+\node[text=textPrimary, font=\zhheiti\bfseries\scriptsize, anchor=north] at ($(s6.north)+(0,-6)$) {RGBA 验证};
+\node[text=gold, font=\ttfamily\tiny, anchor=south] at ($(s6.south)+(0,6)$) {validate};
+
+% 管线箭头
+\foreach \i in {1,...,5} {
+  \pgfmathtruncatemacro{\j}{\i+1}
+  \draw[arrowFlow] (s\i.east) -- (s\j.west);
+}
+
+% 输出箭头
+\draw[arrowFlow, pink!80, line width=1.5pt] (s6.south) -- ++(0,-28)
+  node[midway, right, text=textSecondary, font=\zhfont\scriptsize, inner sep=1pt] {透明 PNG};
+\node[panel, minimum width=64pt, minimum height=26pt, anchor=north, fill=panelBg, draw=pink!50]
+  (outputBox) at ($(s6.south)+(0,-42)$) {};
+\node[text=textPrimary, font=\zhheiti\bfseries\footnotesize, anchor=center] at (outputBox.center) {out/*.png};
+
+% ============================================================
+% 六大视觉族 + 关键指标 (分栏: 左330pt 族, 右 140pt 指标)
+% ============================================================
+\pgfmathsetmacro\famSecTopY{\pageH - 510}
+\pgfmathsetmacro\famLeftW{330}
+\pgfmathsetmacro\famRightW{130}
+\pgfmathsetmacro\famRightX{\pageW - 24 - \famRightW}
+
+\node[text=textPrimary, font=\zhheiti\bfseries\Large, anchor=north west]
+  (famTitle) at (24, \famSecTopY) {六大视觉族};
+
+\node[text=textPrimary, font=\zhheiti\bfseries\Large, anchor=north east]
+  (metricTitle) at (\pageW-24, \famSecTopY) {关键指标};
+
+% 视觉族卡片 (2 行 x 3 列)
+\pgfmathsetmacro\famCardW{104}
+\pgfmathsetmacro\famCardH{56}
+\pgfmathsetmacro\famRowGap{10}
+\pgfmathsetmacro\famColGap{(\famLeftW - 3*\famCardW) / 2}
+\pgfmathsetmacro\famRowOneY{\famSecTopY - 25}
+
+% Row 1
+% 族 1: 地表与体积
+\pgfmathsetmacro\famOneX{24}
+\node[panel, minimum width=\famCardW pt, minimum height=\famCardH pt, anchor=north west]
+  (fam1) at (\famOneX, \famRowOneY) {};
+\node[text=teal, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(fam1.north west)+(8,-6)$) {地表与体积};
+\node[text=textSecondary, font=\zhsongti\footnotesize, text width=\famCardW-16 pt, anchor=north west, align=left]
+  at ($(fam1.north west)+(8,-22)$)
+  {光谱地形 \,$\cdot$\, 螺旋点阵\\等值面波场 \,$\cdot$\, 地震切片};
+
+% 族 2: 流动与矢量
+\pgfmathsetmacro\famTwoX{24 + \famCardW + \famColGap}
+\node[panel, minimum width=\famCardW pt, minimum height=\famCardH pt, anchor=north west]
+  (fam2) at (\famTwoX, \famRowOneY) {};
+\node[text=gold, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(fam2.north west)+(8,-6)$) {流动与矢量};
+\node[text=textSecondary, font=\zhsongti\footnotesize, text width=\famCardW-16 pt, anchor=north west, align=left]
+  at ($(fam2.north west)+(8,-22)$)
+  {涡旋流线 \,$\cdot$\, 城市气流\\张量字形场};
+
+% 族 3: 结构与材料
+\pgfmathsetmacro\famThreeX{24 + 2*(\famCardW + \famColGap)}
+\node[panel, minimum width=\famCardW pt, minimum height=\famCardH pt, anchor=north west]
+  (fam3) at (\famThreeX, \famRowOneY) {};
+\node[text=pink, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(fam3.north west)+(8,-6)$) {结构与材料};
+\node[text=textSecondary, font=\zhsongti\footnotesize, text width=\famCardW-16 pt, anchor=north west, align=left]
+  at ($(fam3.north west)+(8,-22)$)
+  {有限元应力 \,$\cdot$\, 血管树\\分子轨道};
+
+% Row 2
+\pgfmathsetmacro\famRowTwoY{\famRowOneY - \famCardH - \famRowGap}
+
+% 族 4: 遥感与地理
+\node[panel, minimum width=\famCardW pt, minimum height=\famCardH pt, anchor=north west]
+  (fam4) at (\famOneX, \famRowTwoY) {};
+\node[text=blue, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(fam4.north west)+(8,-6)$) {遥感与地理};
+\node[text=textSecondary, font=\zhsongti\footnotesize, text width=\famCardW-16 pt, anchor=north west, align=left]
+  at ($(fam4.north west)+(8,-22)$)
+  {激光点云分类\\行星测地路线};
+
+% 族 5: 隐式几何
+\node[panel, minimum width=\famCardW pt, minimum height=\famCardH pt, anchor=north west]
+  (fam5) at (\famTwoX, \famRowTwoY) {};
+\node[text=purple, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(fam5.north west)+(8,-6)$) {隐式几何};
+\node[text=textSecondary, font=\zhsongti\footnotesize, text width=\famCardW-16 pt, anchor=north west, align=left]
+  at ($(fam5.north west)+(8,-22)$)
+  {三周期极小曲面\\多孔介质孔隙率};
+
+% 族 6: 分支与网络
+\node[panel, minimum width=\famCardW pt, minimum height=\famCardH pt, anchor=north west]
+  (fam6) at (\famThreeX, \famRowTwoY) {};
+\node[text=teal, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(fam6.north west)+(8,-6)$) {分支与网络};
+\node[text=textSecondary, font=\zhsongti\footnotesize, text width=\famCardW-16 pt, anchor=north west, align=left]
+  at ($(fam6.north west)+(8,-22)$)
+  {血管多级分支\\全球测地弧线};
+
+% 关键指标卡 (4 张纵向)
+\pgfmathsetmacro\metricCardW{\famRightW}
+\pgfmathsetmacro\metricCardH{38}
+\pgfmathsetmacro\metricGap{8}
+\pgfmathsetmacro\metricStartY{\famRowOneY}
+
+% 指标 1: 12 个场景
+\node[panel, minimum width=\metricCardW pt, minimum height=\metricCardH pt, anchor=north east]
+  (m1) at (\pageW-24, \metricStartY) {};
+\node[text=teal, font=\zhheiti\bfseries\large, anchor=north] at ($(m1.north)+(0,-4)$) {12};
+\node[text=textSecondary, font=\zhfont\scriptsize, anchor=south] at ($(m1.south)+(0,5)$) {科学场景};
+
+% 指标 2: 5 主色调
+\pgfmathsetmacro\mTwoY{\metricStartY - \metricCardH - \metricGap}
+\node[panel, minimum width=\metricCardW pt, minimum height=\metricCardH pt, anchor=north east]
+  (m2) at (\pageW-24, \mTwoY) {};
+\node[text=gold, font=\zhheiti\bfseries\large, anchor=north] at ($(m2.north)+(0,-4)$) {5};
+\node[text=textSecondary, font=\zhfont\scriptsize, anchor=south] at ($(m2.south)+(0,5)$) {主色调};
+
+% 指标 3: 1600x1000
+\pgfmathsetmacro\mThreeY{\mTwoY - \metricCardH - \metricGap}
+\node[panel, minimum width=\metricCardW pt, minimum height=\metricCardH pt, anchor=north east]
+  (m3) at (\pageW-24, \mThreeY) {};
+\node[text=pink, font=\zhheiti\bfseries\small, anchor=north] at ($(m3.north)+(0,-6)$) {1600$\times$1000};
+\node[text=textSecondary, font=\zhfont\scriptsize, anchor=south] at ($(m3.south)+(0,5)$) {输出分辨率 (px)};
+
+% 指标 4: 3 验证维度
+\pgfmathsetmacro\mFourY{\mThreeY - \metricCardH - \metricGap}
+\node[panel, minimum width=\metricCardW pt, minimum height=\metricCardH pt, anchor=north east]
+  (m4) at (\pageW-24, \mFourY) {};
+\node[text=blue, font=\zhheiti\bfseries\large, anchor=north] at ($(m4.north)+(0,-4)$) {3};
+\node[text=textSecondary, font=\zhfont\scriptsize, anchor=south] at ($(m4.south)+(0,5)$) {验证维度};
+
+% ============================================================
+% 质量验证契约 (底部)
+% ============================================================
+\pgfmathsetmacro\verifyTopY{155}
+
+\node[text=textPrimary, font=\zhheiti\bfseries\Large, anchor=north west]
+  (verifyTitle) at (24, \verifyTopY) {质量验证契约};
+
+\pgfmathsetmacro\verifyCardW{148}
+\pgfmathsetmacro\verifyCardH{62}
+\pgfmathsetmacro\verifyGap{(\pageW - 48 - 3*\verifyCardW) / 2}
+\pgfmathsetmacro\verifyCardY{\verifyTopY - 25}
+
+% 验证 1: 透明度
+\pgfmathsetmacro\vOneX{24}
+\node[panel, minimum width=\verifyCardW pt, minimum height=\verifyCardH pt, anchor=north west, draw=teal!40]
+  (v1) at (\vOneX, \verifyCardY) {};
+\node[text=teal, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(v1.north west)+(8,-6)$) {透明度验证};
+\node[text=textSecondary, font=\zhsongti\footnotesize, text width=\verifyCardW-16 pt, anchor=north west, align=left]
+  at ($(v1.north west)+(8,-22)$)
+  {透明像素占比 $\ge$ 6\%，确保背景为透明而非纯色填充};
+
+% 验证 2: 可见性
+\pgfmathsetmacro\vTwoX{24 + \verifyCardW + \verifyGap}
+\node[panel, minimum width=\verifyCardW pt, minimum height=\verifyCardH pt, anchor=north west, draw=gold!40]
+  (v2) at (\vTwoX, \verifyCardY) {};
+\node[text=gold, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(v2.north west)+(8,-6)$) {可见性验证};
+\node[text=textSecondary, font=\zhsongti\footnotesize, text width=\verifyCardW-16 pt, anchor=north west, align=left]
+  at ($(v2.north west)+(8,-22)$)
+  {非透明可见像素 $\ge$ 3.5\%，确保场景内容非空有效};
+
+% 验证 3: 色彩丰富度
+\pgfmathsetmacro\vThreeX{24 + 2*(\verifyCardW + \verifyGap)}
+\node[panel, minimum width=\verifyCardW pt, minimum height=\verifyCardH pt, anchor=north west, draw=pink!40]
+  (v3) at (\vThreeX, \verifyCardY) {};
+\node[text=pink, font=\zhheiti\bfseries\small, anchor=north west]
+  at ($(v3.north west)+(8,-6)$) {色彩丰富度};
+\node[text=textSecondary, font=\zhsongti\footnotesize, text width=\verifyCardW-16 pt, anchor=north west, align=left]
+  at ($(v3.north west)+(8,-22)$)
+  {彩色像素数 $>$ 2500，确保场景具有实质性的色彩变化};
+
+% ============================================================
+% 底部信息
+% ============================================================
+\draw[teal!25, line width=0.5pt] (24, 55) -- (\pageW-24, 55);
+
+\node[text=textSecondary, font=\zhfont\scriptsize, anchor=south west]
+  at (24, 32) {pyvista-demos \,$\cdot$\, 版本 0.1.0 \,$\cdot$\, Python $\ge$ 3.12};
+
+\node[text=textMuted, font=\zhfont\scriptsize, anchor=south east]
+  at (\pageW-24, 32) {架构信息图 \,$\cdot$\, Architecture Infographic};
+
+\node[text=teal, font=\ttfamily\tiny, anchor=south west]
+  at (24, 12) {numpy  \,$\cdot$\,  pillow  \,$\cdot$\,  pyvista  \,$\cdot$\,  vtk  \,$\cdot$\,  pytest  \,$\cdot$\,  ruff};
+
+\end{tikzpicture}
+\end{document}

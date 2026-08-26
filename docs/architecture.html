@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyVista Demos · 架构文档</title>
+<style>
+  :root {
+    --bg: #fbfcfe;
+    --surface: #ffffff;
+    --surface-2: #f3f6fb;
+    --border: #d8e1ec;
+    --text: #1a2734;
+    --text-muted: #5a6b7d;
+    --text-soft: #8395a7;
+    --accent: #2b7de9;
+    --accent-soft: #e8f0fe;
+    --accent-2: #54d6c6;
+    --accent-3: #ff6f91;
+    --accent-4: #ffd166;
+    --accent-5: #b889ff;
+    --accent-6: #7b9cff;
+    --shadow-sm: 0 1px 2px rgba(20,40,70,0.06), 0 1px 3px rgba(20,40,70,0.04);
+    --shadow-md: 0 4px 12px rgba(20,40,70,0.08), 0 2px 4px rgba(20,40,70,0.05);
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 32px 96px;
+  }
+
+  /* Header */
+  header {
+    margin-bottom: 56px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .subtitle {
+    font-size: 17px;
+    color: var(--text-muted);
+    max-width: 640px;
+  }
+
+  /* Sections */
+  section {
+    margin-bottom: 64px;
+  }
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 24px 0 10px;
+  }
+  p {
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+  p.lead {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  /* Feature grid */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 24px 0 8px;
+  }
+  .feature {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .feature:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .feature-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  .feature h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .feature p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* Diagram cards */
+  .diagram-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin: 24px 0;
+    overflow: hidden;
+  }
+  .diagram-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .diagram-header h4 {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .diagram-tag {
+    font-size: 11px;
+    color: var(--text-soft);
+    font-family: "SF Mono", Monaco, Menlo, monospace;
+  }
+  .diagram-body {
+    padding: 32px 24px;
+    position: relative;
+    min-height: 320px;
+  }
+
+  /* SVG diagram base */
+  svg.arch {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  svg.arch text {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  }
+
+  /* Animation classes */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .stagger > * {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .stagger.visible > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(2) { transition-delay: 0.12s; opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(3) { transition-delay: 0.19s; opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(4) { transition-delay: 0.26s; opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(5) { transition-delay: 0.33s; opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(6) { transition-delay: 0.40s; opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(7) { transition-delay: 0.47s; opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(8) { transition-delay: 0.54s; opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(9) { transition-delay: 0.61s; opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(10) { transition-delay: 0.68s; opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(11) { transition-delay: 0.75s; opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(12) { transition-delay: 0.82s; opacity: 1; transform: translateY(0); }
+
+  /* Flow animation */
+  .flow-line {
+    stroke-dasharray: 6 4;
+    stroke-dashoffset: 20;
+    animation: flowDash 1.2s linear infinite;
+    animation-play-state: paused;
+  }
+  .flow-line.active {
+    animation-play-state: running;
+  }
+  @keyframes flowDash {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* Pulse for active nodes */
+  .node-pulse {
+    animation: nodePulse 2s ease-in-out infinite;
+    animation-play-state: paused;
+  }
+  .node-pulse.active {
+    animation-play-state: running;
+  }
+  @keyframes nodePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.75; }
+  }
+
+  /* Walkthrough steps */
+  .walkthrough {
+    margin: 24px 0;
+  }
+  .step-row {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .step-row:last-child { border-bottom: none; }
+  .step-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: all 0.4s ease;
+  }
+  .step-row.active .step-num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    transform: scale(1.08);
+  }
+  .step-content h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .step-content p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+  .step-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .step-btn {
+    padding: 6px 14px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text);
+    transition: all 0.15s ease;
+  }
+  .step-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .step-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .step-progress {
+    height: 3px;
+    background: var(--surface-2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+  .step-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  /* Scene grid */
+  .scene-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .scene-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    transition: all 0.2s ease;
+    cursor: default;
+  }
+  .scene-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .scene-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+  }
+  .scene-name {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+  }
+  .scene-family {
+    font-size: 11px;
+    color: var(--text-soft);
+    font-family: "SF Mono", Monaco, Menlo, monospace;
+  }
+  .scene-use {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  /* Tech stack chips */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .chip .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Code-style labels */
+  code {
+    font-family: "SF Mono", Monaco, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--surface-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  /* Diagram legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    padding: 0 24px 20px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 72px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-soft);
+    text-align: center;
+  }
+
+  /* Print styles */
+  @media print {
+    body { background: white; font-size: 12px; }
+    .container { max-width: 100%; padding: 0; }
+    header { margin-bottom: 24px; padding-bottom: 12px; }
+    h1 { font-size: 22px; }
+    .subtitle { font-size: 13px; }
+    section { margin-bottom: 28px; page-break-inside: avoid; }
+    h2 { font-size: 16px; }
+    .diagram-card { box-shadow: none; break-inside: avoid; }
+    .diagram-body { padding: 16px; min-height: auto; }
+    .step-btn, .step-progress { display: none; }
+    .step-row { padding: 8px 0; }
+    .scene-grid { grid-template-columns: repeat(3, 1fr); }
+    .feature { box-shadow: none; }
+    .fade-in, .stagger > * { opacity: 1 !important; transform: none !important; }
+    .flow-line, .node-pulse { animation: none !important; stroke-dashoffset: 0 !important; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .fade-in, .stagger > * {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .flow-line, .node-pulse {
+      animation: none !important;
+      stroke-dashoffset: 0;
+    }
+    .feature:hover, .scene-card:hover {
+      transform: none;
+    }
+    .step-row.active .step-num {
+      transform: none;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="eyebrow">Architecture Document</div>
+    <h1>PyVista Demos · 科学可视化演示集</h1>
+    <p class="subtitle">十二个跨学科的 3D 科学场景，通过 PyVista / VTK 离屏渲染，输出透明背景 PNG，作为科学可视化的参考图集与质量基线。</p>
+  </header>
+
+  <!-- 1. 产品概述 -->
+  <section class="fade-in">
+    <h2><span class="num">1</span>产品概述</h2>
+    <p class="lead">
+      PyVista Demos 是一个演示性质的科学可视化项目。它不面向最终用户提供应用，而是以
+      <code>catalog.json</code> 描述的十二种场景为单位，程序化地生成高质量、透明背景的 3D 渲染图，
+      用于视觉回归测试、配色方案验证以及科学可视化组件的参考样例。
+    </p>
+
+    <div class="features stagger">
+      <div class="feature">
+        <div class="feature-icon" style="background:#e8f8f5; color:#2bb8a6;">&#9670;</div>
+        <h4>十二种科学场景</h4>
+        <p>覆盖地形、流体、波动物理、材料、有限元、分子、点云、测地线、张量、血管、地震、城市气流等领域。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#e8f0fe; color:#2b7de9;">&#9679;</div>
+        <h4>离屏渲染管线</h4>
+        <p>基于 PyVista + VTK 的 off-screen 渲染，无需 GUI 环境即可生成 1600x1000 高清透明 PNG。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#fff3e0; color:#f5a623;">&#9733;</div>
+        <h4>确定性与可复现</h4>
+        <p>所有场景使用固定相机位置、固定调色板、确定性场函数，输出可逐像素复现，适用于快照测试。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#fde7ef; color:#e94578;">&#10003;</div>
+        <h4>内置图像质量校验</h4>
+        <p>渲染后自动验证 Alpha 通道比例、可见像素占比、彩色像素数量，防止空图或渲染异常。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#f0e8ff; color:#8b5cf6;">&#8801;</div>
+        <h4>结构化目录清单</h4>
+        <p>catalog.json 记录每个场景的用途、科学问题、视觉家族、复杂度与标签，便于程序化检索。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#e8f8f5; color:#2bb8a6;">&#8644;</div>
+        <h4>单场景或全量渲染</h4>
+        <p>CLI 支持 <code>--scene</code> 过滤单个场景，默认全量输出；结果以 JSON 报告形式返回。</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <h3 style="margin-bottom:8px;">技术栈</h3>
+      <div class="chips">
+        <span class="chip"><span class="dot" style="background:#3776ab;"></span>Python 3.12+</span>
+        <span class="chip"><span class="dot" style="background:#ff6f91;"></span>PyVista 0.46</span>
+        <span class="chip"><span class="dot" style="background:#54d6c6;"></span>VTK 9.5</span>
+        <span class="chip"><span class="dot" style="background:#7b9cff;"></span>NumPy 2.x</span>
+        <span class="chip"><span class="dot" style="background:#ffd166;"></span>Pillow 11.x</span>
+        <span class="chip"><span class="dot" style="background:#b889ff;"></span>uv</span>
+        <span class="chip"><span class="dot" style="background:#5a6b7d;"></span>pytest</span>
+        <span class="chip"><span class="dot" style="background:#5a6b7d;"></span>ruff</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 系统架构图 -->
+  <section class="fade-in">
+    <h2><span class="num">2</span>系统架构</h2>
+    <p class="lead">
+      项目采用「入口层 → 场景构建层 → 渲染引擎层 → 输出校验层」的四层线性结构。
+      每层职责单一，通过明确的数据对象（场景 ID、Plotter 实例、PNG 文件）串联。
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-header">
+        <h4>分层架构图</h4>
+        <span class="diagram-tag">layered architecture</span>
+      </div>
+      <div class="diagram-body" id="layered-diagram">
+        <svg class="arch" viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#e8f0fe"/>
+              <stop offset="100%" stop-color="#d2e3fc"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#e8f8f5"/>
+              <stop offset="100%" stop-color="#c8f0e8"/>
+            </linearGradient>
+            <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fff3e0"/>
+              <stop offset="100%" stop-color="#ffe0a3"/>
+            </linearGradient>
+            <linearGradient id="g4" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fde7ef"/>
+              <stop offset="100%" stop-color="#f9c4d8"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Layer 4: CLI Entry -->
+          <rect class="arch-node" x="40" y="20" width="720" height="65" rx="10" fill="url(#g1)" stroke="#2b7de9" stroke-width="1.5" opacity="0.9"/>
+          <text x="60" y="45" font-size="14" font-weight="600" fill="#1a2734">入口层 · CLI Entry</text>
+          <text x="60" y="65" font-size="12" fill="#5a6b7d">argparse 解析参数 · 场景分发 · 汇总 JSON 报告</text>
+          <g transform="translate(480, 32)">
+            <rect width="110" height="22" rx="6" fill="white" stroke="#2b7de9" stroke-width="1" opacity="0.8"/>
+            <text x="55" y="15" font-size="11" fill="#2b7de9" text-anchor="middle" font-family="monospace">main()</text>
+          </g>
+
+          <!-- Arrow -->
+          <line x1="400" y1="88" x2="400" y2="108" stroke="#8395a7" stroke-width="2" stroke-dasharray="4 3" class="flow-line active"/>
+
+          <!-- Layer 3: Scene Builders -->
+          <rect class="arch-node" x="40" y="110" width="720" height="75" rx="10" fill="url(#g2)" stroke="#2bb8a6" stroke-width="1.5" opacity="0.9"/>
+          <text x="60" y="135" font-size="14" font-weight="600" fill="#1a2734">场景构建层 · Scene Builders</text>
+          <text x="60" y="155" font-size="12" fill="#5a6b7d">12 个独立 builder 函数 · 生成 numpy 场 · 装配 PyVista mesh · 设置相机与光照</text>
+          <g transform="translate(480, 122)">
+            <rect width="58" height="20" rx="5" fill="white" stroke="#2bb8a6" stroke-width="1" opacity="0.8"/>
+            <text x="29" y="14" font-size="10" fill="#2bb8a6" text-anchor="middle" font-family="monospace">spectral_terrain</text>
+          </g>
+          <g transform="translate(545, 122)">
+            <rect width="68" height="20" rx="5" fill="white" stroke="#2bb8a6" stroke-width="1" opacity="0.8"/>
+            <text x="34" y="14" font-size="10" fill="#2bb8a6" text-anchor="middle" font-family="monospace">vortex_streamlines</text>
+          </g>
+          <g transform="translate(620, 122)">
+            <rect width="62" height="20" rx="5" fill="white" stroke="#2bb8a6" stroke-width="1" opacity="0.8"/>
+            <text x="31" y="14" font-size="10" fill="#2bb8a6" text-anchor="middle" font-family="monospace">wave_isosurface</text>
+          </g>
+          <text x="692" y="135" font-size="14" fill="#2bb8a6">…</text>
+          <g transform="translate(480, 150)">
+            <rect width="80" height="20" rx="5" fill="white" stroke="#2bb8a6" stroke-width="1" opacity="0.8"/>
+            <text x="40" y="14" font-size="10" fill="#2bb8a6" text-anchor="middle" font-family="monospace">BUILDERS 字典</text>
+          </g>
+
+          <!-- Arrow -->
+          <line x1="400" y1="188" x2="400" y2="208" stroke="#8395a7" stroke-width="2" stroke-dasharray="4 3" class="flow-line active"/>
+
+          <!-- Layer 2: Render Engine -->
+          <rect class="arch-node" x="40" y="210" width="720" height="65" rx="10" fill="url(#g3)" stroke="#f5a623" stroke-width="1.5" opacity="0.9"/>
+          <text x="60" y="235" font-size="14" font-weight="600" fill="#1a2734">渲染引擎层 · Render Engine</text>
+          <text x="60" y="255" font-size="12" fill="#5a6b7d">PyVista Plotter · VTK OpenGL 离屏渲染 · transparent_background 截图</text>
+          <g transform="translate(520, 222)">
+            <rect width="80" height="22" rx="6" fill="white" stroke="#f5a623" stroke-width="1" opacity="0.8"/>
+            <text x="40" y="15" font-size="11" fill="#f5a623" text-anchor="middle" font-family="monospace">render()</text>
+          </g>
+
+          <!-- Arrow -->
+          <line x1="400" y1="278" x2="400" y2="298" stroke="#8395a7" stroke-width="2" stroke-dasharray="4 3" class="flow-line active"/>
+
+          <!-- Layer 1: Output & Validation -->
+          <rect class="arch-node" x="40" y="300" width="720" height="65" rx="10" fill="url(#g4)" stroke="#e94578" stroke-width="1.5" opacity="0.9"/>
+          <text x="60" y="325" font-size="14" font-weight="600" fill="#1a2734">输出校验层 · Output &amp; Validation</text>
+          <text x="60" y="345" font-size="12" fill="#5a6b7d">Pillow 读取 RGBA · Alpha 通道校验 · 彩色像素统计 · out/*.png 落盘</text>
+          <g transform="translate(520, 312)">
+            <rect width="120" height="22" rx="6" fill="white" stroke="#e94578" stroke-width="1" opacity="0.8"/>
+            <text x="60" y="15" font-size="11" fill="#e94578" text-anchor="middle" font-family="monospace">validate_png()</text>
+          </g>
+        </svg>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch" style="background:#e8f0fe; border-color:#2b7de9;"></span>入口层</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#e8f8f5; border-color:#2bb8a6;"></span>场景构建层</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#fff3e0; border-color:#f5a623;"></span>渲染引擎层</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#fde7ef; border-color:#e94578;"></span>输出校验层</div>
+        <div class="legend-item"><span style="display:inline-block;width:20px;height:0;border-top:2px dashed #8395a7;"></span>数据流</div>
+      </div>
+    </div>
+
+    <h3>分层职责说明</h3>
+    <p>
+      <strong>入口层</strong> 是 CLI 的唯一入口，由 <code>main()</code> 函数构成。它解析 <code>--scene</code> 与
+      <code>--out</code> 参数，确认目标场景集合，创建输出目录，然后逐个调用渲染函数，最后将校验结果汇总为 JSON
+      打印到标准输出。该层不包含任何绘图逻辑，只负责调度与报告。
+    </p>
+    <p>
+      <strong>场景构建层</strong> 是项目的核心内容，由 12 个独立的 builder 函数和一个
+      <code>BUILDERS</code> 字典构成。每个函数内部先用 NumPy 生成确定性的场数据（结构化网格、向量场、粒子集等），
+      然后转换为 PyVista 的 mesh 对象（StructuredGrid、ImageData、PolyData 等），设置颜色映射、透明度、光照等渲染参数，
+      最后返回配置好的 Plotter 实例。所有场景共享统一的调色板 <code>PALETTE</code> 和相机位置风格。
+    </p>
+    <p>
+      <strong>渲染引擎层</strong> 封装了 PyVista / VTK 的离屏渲染流程。<code>render()</code> 函数从 BUILDERS
+      获取 Plotter，调用 <code>show(auto_close=False)</code> 触发渲染管线，再通过
+      <code>screenshot(transparent_background=True)</code> 捕获透明背景的帧缓冲，最后关闭 Plotter 释放资源。
+      该层是与第三方库耦合最深的一层，但被限制在单个函数内。
+    </p>
+    <p>
+      <strong>输出校验层</strong> 由 <code>validate_png()</code> 提供质量闸门。它用 Pillow 打开 PNG
+      并转为 RGBA，统计完全透明像素比例、可见像素比例和彩色像素数量（R/G/B 最大差 &gt; 24 且 Alpha &gt; 16 的像素数），
+      三项任一低于阈值即抛出异常。这保证了渲染失败、空图、纯灰度图等异常情况能被自动检测。
+    </p>
+  </section>
+
+  <!-- 3. 数据流图 -->
+  <section class="fade-in">
+    <h2><span class="num">3</span>数据流与模块关系</h2>
+    <p class="lead">
+      从配置输入到图像输出，数据沿一条清晰的路径流动。以下展示各模块之间的依赖关系与关键数据对象。
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-header">
+        <h4>数据流图</h4>
+        <span class="diagram-tag">data flow</span>
+      </div>
+      <div class="diagram-body" id="flow-diagram">
+        <svg class="arch" viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg">
+          <!-- Left: Inputs -->
+          <g transform="translate(30, 30)">
+            <rect class="arch-node" width="130" height="50" rx="8" fill="#f0e8ff" stroke="#8b5cf6" stroke-width="1.5"/>
+            <text x="65" y="24" font-size="12" font-weight="600" fill="#1a2734" text-anchor="middle">catalog.json</text>
+            <text x="65" y="40" font-size="10" fill="#5a6b7d" text-anchor="middle">场景元数据</text>
+          </g>
+
+          <g transform="translate(30, 110)">
+            <rect class="arch-node" width="130" height="50" rx="8" fill="#e8f8f5" stroke="#2bb8a6" stroke-width="1.5"/>
+            <text x="65" y="24" font-size="12" font-weight="600" fill="#1a2734" text-anchor="middle">SCENES 元组</text>
+            <text x="65" y="40" font-size="10" fill="#5a6b7d" text-anchor="middle">__init__.py</text>
+          </g>
+
+          <g transform="translate(30, 190)">
+            <rect class="arch-node" width="130" height="50" rx="8" fill="#fff3e0" stroke="#f5a623" stroke-width="1.5"/>
+            <text x="65" y="24" font-size="12" font-weight="600" fill="#1a2734" text-anchor="middle">CLI 参数</text>
+            <text x="65" y="40" font-size="10" fill="#5a6b7d" text-anchor="middle">argparse</text>
+          </g>
+
+          <!-- Center: Core pipeline -->
+          <g transform="translate(240, 30)">
+            <rect class="arch-node node-pulse active" width="160" height="60" rx="10" fill="#e8f0fe" stroke="#2b7de9" stroke-width="2"/>
+            <text x="80" y="25" font-size="13" font-weight="600" fill="#1a2734" text-anchor="middle">render()</text>
+            <text x="80" y="43" font-size="10" fill="#5a6b7d" text-anchor="middle">渲染调度函数</text>
+          </g>
+
+          <g transform="translate(240, 130)">
+            <rect class="arch-node" width="160" height="60" rx="10" fill="#e8f8f5" stroke="#2bb8a6" stroke-width="2"/>
+            <text x="80" y="25" font-size="13" font-weight="600" fill="#1a2734" text-anchor="middle">scene_builder()</text>
+            <text x="80" y="43" font-size="10" fill="#5a6b7d" text-anchor="middle">场景构建函数 × 12</text>
+          </g>
+
+          <g transform="translate(240, 230)">
+            <rect class="arch-node node-pulse active" width="160" height="60" rx="10" fill="#fde7ef" stroke="#e94578" stroke-width="2"/>
+            <text x="80" y="25" font-size="13" font-weight="600" fill="#1a2734" text-anchor="middle">validate_png()</text>
+            <text x="80" y="43" font-size="10" fill="#5a6b7d" text-anchor="middle">图像质量校验</text>
+          </g>
+
+          <!-- Right: External libs -->
+          <g transform="translate(490, 30)">
+            <rect class="arch-node" width="130" height="50" rx="8" fill="#ffffff" stroke="#5a6b7d" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="65" y="24" font-size="12" font-weight="600" fill="#1a2734" text-anchor="middle">PyVista</text>
+            <text x="65" y="40" font-size="10" fill="#5a6b7d" text-anchor="middle">Plotter / mesh</text>
+          </g>
+
+          <g transform="translate(490, 110)">
+            <rect class="arch-node" width="130" height="50" rx="8" fill="#ffffff" stroke="#5a6b7d" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="65" y="24" font-size="12" font-weight="600" fill="#1a2734" text-anchor="middle">NumPy</text>
+            <text x="65" y="40" font-size="10" fill="#5a6b7d" text-anchor="middle">场 / 向量生成</text>
+          </g>
+
+          <g transform="translate(490, 190)">
+            <rect class="arch-node" width="130" height="50" rx="8" fill="#ffffff" stroke="#5a6b7d" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="65" y="24" font-size="12" font-weight="600" fill="#1a2734" text-anchor="middle">Pillow</text>
+            <text x="65" y="40" font-size="10" fill="#5a6b7d" text-anchor="middle">RGBA 校验</text>
+          </g>
+
+          <!-- Output -->
+          <g transform="translate(660, 100)">
+            <rect class="arch-node" width="110" height="70" rx="8" fill="#fff3e0" stroke="#f5a623" stroke-width="1.5"/>
+            <text x="55" y="28" font-size="12" font-weight="600" fill="#1a2734" text-anchor="middle">out/*.png</text>
+            <text x="55" y="45" font-size="10" fill="#5a6b7d" text-anchor="middle">透明背景 PNG</text>
+            <text x="55" y="58" font-size="10" fill="#5a6b7d" text-anchor="middle">1600×1000</text>
+          </g>
+
+          <g transform="translate(660, 210)">
+            <rect class="arch-node" width="110" height="50" rx="8" fill="#f0e8ff" stroke="#8b5cf6" stroke-width="1.5"/>
+            <text x="55" y="22" font-size="12" font-weight="600" fill="#1a2734" text-anchor="middle">JSON 报告</text>
+            <text x="55" y="38" font-size="10" fill="#5a6b7d" text-anchor="middle">stdout</text>
+          </g>
+
+          <!-- Flow arrows -->
+          <line x1="160" y1="55" x2="235" y2="55" stroke="#8395a7" stroke-width="1.5" marker-end="url(#arrow)" class="flow-line active"/>
+          <line x1="160" y1="135" x2="235" y2="155" stroke="#8395a7" stroke-width="1.5" marker-end="url(#arrow)" class="flow-line active"/>
+          <line x1="160" y1="215" x2="235" y2="55" stroke="#8395a7" stroke-width="1.5" marker-end="url(#arrow)" class="flow-line active"/>
+
+          <line x1="320" y1="90" x2="320" y2="125" stroke="#8395a7" stroke-width="1.5" marker-end="url(#arrow)" class="flow-line active"/>
+          <line x1="320" y1="190" x2="320" y2="225" stroke="#8395a7" stroke-width="1.5" marker-end="url(#arrow)" class="flow-line active"/>
+
+          <line x1="400" y1="60" x2="485" y2="55" stroke="#8395a7" stroke-width="1.5" marker-end="url(#arrow)" class="flow-line active"/>
+          <line x1="400" y1="160" x2="485" y2="135" stroke="#8395a7" stroke-width="1.5" marker-end="url(#arrow)" class="flow-line active"/>
+          <line x1="400" y1="260" x2="485" y2="215" stroke="#8395a7" stroke-width="1.5" marker-end="url(#arrow)" class="flow-line active"/>
+
+          <path d="M 400 70 Q 540 70 540 135 Q 540 160 655 135" fill="none" stroke="#8395a7" stroke-width="1.5" marker-end="url(#arrow)" class="flow-line active"/>
+          <line x1="400" y1="260" x2="655" y2="235" stroke="#8395a7" stroke-width="1.5" marker-end="url(#arrow)" class="flow-line active"/>
+
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#8395a7"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch" style="background:#e8f0fe; border-color:#2b7de9;"></span>核心模块</div>
+        <div class="legend-item"><span class="legend-swatch" style="border-style:dashed;"></span>外部依赖</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#fff3e0; border-color:#f5a623;"></span>文件产物</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#f0e8ff; border-color:#8b5cf6;"></span>配置 / 报告</div>
+      </div>
+    </div>
+
+    <h3>关键数据对象</h3>
+    <p>
+      <strong>SCENES 元组</strong> 是场景 ID 的权威清单，定义于 <code>__init__.py</code>。
+      它既是 CLI 选项的 <code>choices</code> 来源，也是测试中校验 BUILDERS 字典完整性的基准。
+      <code>catalog.json</code> 则是对同一批场景的补充描述，提供人类可读的用途说明和标签。
+      两者通过 <code>id</code> 字段一一对应，但来源不同：SCENES 在代码中，catalog 在配置中。
+    </p>
+    <p>
+      <strong>Plotter 实例</strong> 是场景构建层与渲染引擎层之间的接口对象。每个 builder 返回一个已经配置好
+      mesh、相机、光照、文字的 Plotter，render() 只需调用 show + screenshot，不需要知道场景的具体内容。
+      这种分离使得新增场景只需写一个 builder 并注册到 BUILDERS，渲染逻辑完全复用。
+    </p>
+    <p>
+      <strong>校验结果字典</strong> 包含 scene、size、transparent_pct、visible_pct、colorful 五个字段，
+      既用于运行时异常检测（阈值不满足时 raise），也用于最终 JSON 报告。测试合约
+      <code>test_rendered_gallery_contract</code> 进一步确保 out/ 目录下每个场景都有对应 PNG 且质量达标。
+    </p>
+  </section>
+
+  <!-- 4. 主走查 -->
+  <section class="fade-in">
+    <h2><span class="num">4</span>主走查 · 全量渲染</h2>
+    <p class="lead">
+      以「执行 <code>uv run render-pyvista-demos</code> 渲染全部 12 个场景」为端到端场景，
+      逐步追踪从命令启动到输出 PNG 报告的完整路径。
+    </p>
+
+    <div class="walkthrough" id="walkthrough">
+      <div class="step-row" data-step="1">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>CLI 入口解析与初始化</h4>
+          <p>argparse 解析 <code>--scene</code> 和 <code>--out</code> 参数；未指定 --scene 时使用 SCENES 全量列表。创建输出目录 <code>out/</code>（如不存在）。</p>
+        </div>
+      </div>
+      <div class="step-row" data-step="2">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>按场景迭代 · 调用 render()</h4>
+          <p>遍历选定的场景 ID 列表，对每个场景调用 <code>render(scene, output_path)</code>。单场景失败会中断整个流程（异常冒泡）。</p>
+        </div>
+      </div>
+      <div class="step-row" data-step="3">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>场景构建 · 生成 Plotter</h4>
+          <p>从 BUILDERS 字典查找对应 builder 函数，执行之。内部用 NumPy 生成场数据 → 组装 PyVista mesh → 添加到 Plotter → 设置相机。返回配置完成的 Plotter 实例。</p>
+        </div>
+      </div>
+      <div class="step-row" data-step="4">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>离屏渲染 · 截图落盘</h4>
+          <p>调用 <code>plotter.show(auto_close=False)</code> 触发 VTK 渲染管线，再以 <code>screenshot(transparent_background=True)</code> 捕获帧缓冲并写入 PNG 文件。</p>
+        </div>
+      </div>
+      <div class="step-row" data-step="5">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h4>图像质量校验</h4>
+          <p>Pillow 读取刚生成的 PNG，统计 Alpha 直方图与彩色像素数。透明像素 &lt; 6%、可见像素 &lt; 3.5% 或彩色像素 &lt; 2500 任一不满足即抛 RuntimeError。</p>
+        </div>
+      </div>
+      <div class="step-row" data-step="6">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <h4>汇总报告 · JSON 输出</h4>
+          <p>全部场景渲染校验完成后，将每个场景的校验结果字典收集为列表，以格式化 JSON 打印到标准输出。调用方可解析该报告做进一步自动化处理。</p>
+        </div>
+      </div>
+
+      <div class="step-progress"><div class="step-progress-bar" id="step-bar"></div></div>
+      <div class="step-controls">
+        <button class="step-btn" id="step-prev" onclick="walkPrev()">上一步</button>
+        <button class="step-btn" id="step-next" onclick="walkNext()">下一步</button>
+        <button class="step-btn" onclick="walkAuto()" id="step-auto">自动播放</button>
+        <button class="step-btn" onclick="walkReset()">重置</button>
+        <span style="font-size:12px;color:var(--text-soft);align-self:center;margin-left:8px;" id="step-label">第 1 / 6 步</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 场景家族总览 -->
+  <section class="fade-in">
+    <h2><span class="num">5</span>场景家族总览</h2>
+    <p class="lead">
+      十二个场景按视觉家族（visual family）可分为若干类型。每个场景独立、无依赖，
+      通过 BUILDERS 字典的统一接口接入渲染管线。
+    </p>
+
+    <div class="scene-grid stagger" id="scene-grid">
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#54d6c6;"></span>spectral-terrain</div>
+        <div class="scene-family">3D surface</div>
+        <div class="scene-use">地形分析 · 多频高程分量</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#54d6c6;"></span>vortex-streamlines</div>
+        <div class="scene-family">streamlines</div>
+        <div class="scene-use">流体动力学 · 涡旋流线</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#7b9cff;"></span>wave-isosurface</div>
+        <div class="scene-family">isosurface</div>
+        <div class="scene-use">波动物理 · 干涉等值面</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#7b9cff;"></span>gyroid-lattice</div>
+        <div class="scene-family">implicit surface</div>
+        <div class="scene-use">材料工程 · 三周期极小曲面</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#ffd166;"></span>finite-element-stress</div>
+        <div class="scene-family">FEA</div>
+        <div class="scene-use">结构工程 · 悬臂梁应力</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#ff6f91;"></span>molecular-orbitals</div>
+        <div class="scene-family">molecular scene</div>
+        <div class="scene-use">计算化学 · 分子轨道</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#54d6c6;"></span>classified-point-cloud</div>
+        <div class="scene-family">point cloud</div>
+        <div class="scene-use">遥感 · 激光雷达分类</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#b889ff;"></span>planetary-routes</div>
+        <div class="scene-family">globe</div>
+        <div class="scene-use">全球网络 · 测地线路由</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#ffd166;"></span>tensor-glyphs</div>
+        <div class="scene-family">glyph field</div>
+        <div class="scene-use">扩散分析 · 张量方向场</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#ff6f91;"></span>vascular-tree</div>
+        <div class="scene-family">branching tubes</div>
+        <div class="scene-use">生物医学 · 血管树分支</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#7b9cff;"></span>seismic-slices</div>
+        <div class="scene-family">volume slices</div>
+        <div class="scene-use">地球物理 · 地震体切片</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-name"><span class="scene-dot" style="background:#54d6c6;"></span>urban-airflow</div>
+        <div class="scene-family">3D flow scene</div>
+        <div class="scene-use">城市气候 · 街区风廊</div>
+      </div>
+    </div>
+
+    <h3>场景设计约束</h3>
+    <p>
+      每个场景都遵循相同的隐形约定：画布尺寸 1600×1000、深色背景
+      （用于透明渲染时的视觉参考，实际输出为透明）、左上角两排标题与副标题文字、固定调色板
+      <code>PALETTE</code> 的五种主色、统一的斜视等距相机视角。这些约束确保十二张图放在一起时
+      视觉风格一致，可作为统一的图集使用。
+    </p>
+    <p>
+      数据层面，所有场函数均为纯数学合成（无外部数据文件依赖），使用确定性随机种子（如
+      <code>default_rng(42)</code>），保证跨平台、跨版本的渲染结果可复现。
+      这一特性使项目天然适合作为可视化工具链的回归测试基准。
+    </p>
+  </section>
+
+  <!-- 6. 测试与质量保障 -->
+  <section class="fade-in">
+    <h2><span class="num">6</span>测试与质量保障</h2>
+    <p class="lead">
+      项目采用轻量但闭环的测试策略：结构一致性测试 + 输出合约测试，
+      配合运行时图像校验，形成三层质量防线。
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-header">
+        <h4>质量防线图</h4>
+        <span class="diagram-tag">quality gates</span>
+      </div>
+      <div class="diagram-body" id="quality-diagram" style="min-height: 240px;">
+        <svg class="arch" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Gate 1 -->
+          <g transform="translate(30, 30)">
+            <rect class="arch-node" width="220" height="160" rx="12" fill="#ffffff" stroke="#d8e1ec" stroke-width="1.5"/>
+            <rect x="0" y="0" width="220" height="32" rx="12" fill="#e8f0fe"/>
+            <rect x="0" y="16" width="220" height="16" fill="#e8f0fe"/>
+            <text x="110" y="21" font-size="12" font-weight="600" fill="#2b7de9" text-anchor="middle">第一层 · 结构一致性</text>
+            <text x="20" y="60" font-size="12" fill="#1a2734">test_every_scene_has_a_builder</text>
+            <text x="20" y="82" font-size="11" fill="#5a6b7d">SCENES 数量 ≥ 12</text>
+            <text x="20" y="100" font-size="11" fill="#5a6b7d">SCENES 与 BUILDERS 键集合一一对应</text>
+            <line x1="20" y1="120" x2="200" y2="120" stroke="#d8e1ec" stroke-width="1"/>
+            <text x="20" y="140" font-size="11" fill="#2b7de9" font-family="monospace">pytest · 快速</text>
+            <text x="20" y="158" font-size="10" fill="#8395a7">无需渲染，毫秒级</text>
+          </g>
+
+          <!-- Gate 2 -->
+          <g transform="translate(290, 30)">
+            <rect class="arch-node" width="220" height="160" rx="12" fill="#ffffff" stroke="#d8e1ec" stroke-width="1.5"/>
+            <rect x="0" y="0" width="220" height="32" rx="12" fill="#e8f8f5"/>
+            <rect x="0" y="16" width="220" height="16" fill="#e8f8f5"/>
+            <text x="110" y="21" font-size="12" font-weight="600" fill="#2bb8a6" text-anchor="middle">第二层 · 运行时校验</text>
+            <text x="20" y="60" font-size="12" fill="#1a2734">validate_png()</text>
+            <text x="20" y="82" font-size="11" fill="#5a6b7d">Alpha 通道占比 ≥ 6%</text>
+            <text x="20" y="100" font-size="11" fill="#5a6b7d">可见像素 ≥ 3.5%</text>
+            <text x="20" y="118" font-size="11" fill="#5a6b7d">彩色像素 ≥ 2500</text>
+            <line x1="20" y1="132" x2="200" y2="132" stroke="#d8e1ec" stroke-width="1"/>
+            <text x="20" y="152" font-size="11" fill="#2bb8a6" font-family="monospace">render 调用内联执行</text>
+            <text x="20" y="168" font-size="10" fill="#8395a7">失败即中断，异常冒泡</text>
+          </g>
+
+          <!-- Gate 3 -->
+          <g transform="translate(550, 30)">
+            <rect class="arch-node" width="220" height="160" rx="12" fill="#ffffff" stroke="#d8e1ec" stroke-width="1.5"/>
+            <rect x="0" y="0" width="220" height="32" rx="12" fill="#fde7ef"/>
+            <rect x="0" y="16" width="220" height="16" fill="#fde7ef"/>
+            <text x="110" y="21" font-size="12" font-weight="600" fill="#e94578" text-anchor="middle">第三层 · 输出合约</text>
+            <text x="20" y="60" font-size="12" fill="#1a2734">test_rendered_gallery_contract</text>
+            <text x="20" y="82" font-size="11" fill="#5a6b7d">每个 SCENE 对应 out/*.png</text>
+            <text x="20" y="100" font-size="11" fill="#5a6b7d">每张图 colorful &gt; 2500</text>
+            <text x="20" y="118" font-size="11" fill="#5a6b7d">文件存在 + 质量达标</text>
+            <line x1="20" y1="132" x2="200" y2="132" stroke="#d8e1ec" stroke-width="1"/>
+            <text x="20" y="152" font-size="11" fill="#e94578" font-family="monospace">pytest · 全量</text>
+            <text x="20" y="168" font-size="10" fill="#8395a7">需先执行渲染</text>
+          </g>
+
+          <!-- Flow arrows -->
+          <defs>
+            <marker id="arrow2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#8395a7"/>
+            </marker>
+          </defs>
+          <line x1="250" y1="110" x2="285" y2="110" stroke="#8395a7" stroke-width="2" marker-end="url(#arrow2)" class="flow-line active"/>
+          <line x1="510" y1="110" x2="545" y2="110" stroke="#8395a7" stroke-width="2" marker-end="url(#arrow2)" class="flow-line active"/>
+
+          <text x="267" y="100" font-size="10" fill="#8395a7" text-anchor="middle">结构正确</text>
+          <text x="527" y="100" font-size="10" fill="#8395a7" text-anchor="middle">渲染通过</text>
+        </svg>
+      </div>
+    </div>
+
+    <h3>设计考量</h3>
+    <p>
+      三层防线的设计体现了「快失败优先」原则：第一层结构测试不依赖渲染，在 CI 中可以毫秒级反馈，
+      防止「新增了场景但忘了注册」这类低级错误混入。第二层运行时校验嵌入渲染流程本身，
+      确保任何一张异常输出都不会静默通过。第三层输出合约测试则是对 out/ 目录完整性的最终审计，
+      在发布前或 CI 的完整流程中运行。
+    </p>
+    <p>
+      项目未引入像素级快照对比（snapshot diff），因为不同 VTK 版本、不同驱动的 OpenGL 实现可能导致
+      亚像素级差异。选择基于统计量（像素计数、比例）的校验是在稳定性与严格性之间的有意权衡。
+    </p>
+  </section>
+
+  <footer>
+    PyVista Demos · 架构文档 · 生成于 2026-08-24
+  </footer>
+
+</div>
+
+<script>
+(function() {
+  // IntersectionObserver for fade-in elements
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-in, .stagger').forEach(function(el) {
+      observer.observe(el);
+    });
+  } else {
+    // No JS IntersectionObserver fallback: show everything
+    document.querySelectorAll('.fade-in, .stagger').forEach(function(el) {
+      el.classList.add('visible');
+    });
+  }
+})();
+
+// Walkthrough logic
+var walkStep = 1;
+var walkTotal = 6;
+var walkTimer = null;
+
+function updateWalk() {
+  var rows = document.querySelectorAll('#walkthrough .step-row');
+  rows.forEach(function(row) {
+    var n = parseInt(row.getAttribute('data-step'), 10);
+    if (n <= walkStep) {
+      row.classList.add('active');
+    } else {
+      row.classList.remove('active');
+    }
+  });
+  var bar = document.getElementById('step-bar');
+  if (bar) bar.style.width = (walkStep / walkTotal * 100) + '%';
+  var label = document.getElementById('step-label');
+  if (label) label.textContent = '第 ' + walkStep + ' / ' + walkTotal + ' 步';
+  var prev = document.getElementById('step-prev');
+  var next = document.getElementById('step-next');
+  if (prev) prev.disabled = walkStep <= 1;
+  if (next) next.disabled = walkStep >= walkTotal;
+}
+
+function walkNext() {
+  if (walkStep < walkTotal) { walkStep++; updateWalk(); }
+}
+function walkPrev() {
+  if (walkStep > 1) { walkStep--; updateWalk(); }
+}
+function walkReset() {
+  walkStep = 1;
+  if (walkTimer) { clearInterval(walkTimer); walkTimer = null; }
+  var btn = document.getElementById('step-auto');
+  if (btn) btn.textContent = '自动播放';
+  updateWalk();
+}
+function walkAuto() {
+  var btn = document.getElementById('step-auto');
+  if (walkTimer) {
+    clearInterval(walkTimer);
+    walkTimer = null;
+    if (btn) btn.textContent = '自动播放';
+  } else {
+    if (walkStep >= walkTotal) walkStep = 0;
+    walkTimer = setInterval(function() {
+      if (walkStep < walkTotal) {
+        walkStep++;
+        updateWalk();
+      } else {
+        clearInterval(walkTimer);
+        walkTimer = null;
+        if (btn) btn.textContent = '自动播放';
+      }
+    }, 1500);
+    if (btn) btn.textContent = '暂停';
+  }
+}
+
+updateWalk();
+</script>
+
+</body>
+</html>
