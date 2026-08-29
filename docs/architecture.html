@@ -486,7 +486,7 @@
 <div class="container">
 
   <header>
-    <div class="eyebrow">Architecture Document</div>
+    <div class="eyebrow">架构文档</div>
     <h1>PyVista Demos · 科学可视化演示集</h1>
     <p class="subtitle">十二个跨学科的 3D 科学场景，通过 PyVista / VTK 离屏渲染，输出透明背景 PNG，作为科学可视化的参考图集与质量基线。</p>
   </header>
@@ -509,7 +509,7 @@
       <div class="feature">
         <div class="feature-icon" style="background:#e8f0fe; color:#2b7de9;">&#9679;</div>
         <h4>离屏渲染管线</h4>
-        <p>基于 PyVista + VTK 的 off-screen 渲染，无需 GUI 环境即可生成 1600x1000 高清透明 PNG。</p>
+        <p>基于 PyVista + VTK 的离屏渲染，无需 GUI 环境即可生成 1600x1000 高清透明 PNG。</p>
       </div>
       <div class="feature">
         <div class="feature-icon" style="background:#fff3e0; color:#f5a623;">&#9733;</div>
@@ -559,7 +559,7 @@
     <div class="diagram-card">
       <div class="diagram-header">
         <h4>分层架构图</h4>
-        <span class="diagram-tag">layered architecture</span>
+        <span class="diagram-tag">分层架构</span>
       </div>
       <div class="diagram-body" id="layered-diagram">
         <svg class="arch" viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg">
@@ -596,7 +596,7 @@
 
           <!-- Layer 3: Scene Builders -->
           <rect class="arch-node" x="40" y="110" width="720" height="75" rx="10" fill="url(#g2)" stroke="#2bb8a6" stroke-width="1.5" opacity="0.9"/>
-          <text x="60" y="135" font-size="14" font-weight="600" fill="#1a2734">场景构建层 · Scene Builders</text>
+          <text x="60" y="135" font-size="14" font-weight="600" fill="#1a2734">场景构建层</text>
           <text x="60" y="155" font-size="12" fill="#5a6b7d">12 个独立 builder 函数 · 生成 numpy 场 · 装配 PyVista mesh · 设置相机与光照</text>
           <g transform="translate(480, 122)">
             <rect width="58" height="20" rx="5" fill="white" stroke="#2bb8a6" stroke-width="1" opacity="0.8"/>
@@ -621,7 +621,7 @@
 
           <!-- Layer 2: Render Engine -->
           <rect class="arch-node" x="40" y="210" width="720" height="65" rx="10" fill="url(#g3)" stroke="#f5a623" stroke-width="1.5" opacity="0.9"/>
-          <text x="60" y="235" font-size="14" font-weight="600" fill="#1a2734">渲染引擎层 · Render Engine</text>
+          <text x="60" y="235" font-size="14" font-weight="600" fill="#1a2734">渲染引擎层</text>
           <text x="60" y="255" font-size="12" fill="#5a6b7d">PyVista Plotter · VTK OpenGL 离屏渲染 · transparent_background 截图</text>
           <g transform="translate(520, 222)">
             <rect width="80" height="22" rx="6" fill="white" stroke="#f5a623" stroke-width="1" opacity="0.8"/>
@@ -633,7 +633,7 @@
 
           <!-- Layer 1: Output & Validation -->
           <rect class="arch-node" x="40" y="300" width="720" height="65" rx="10" fill="url(#g4)" stroke="#e94578" stroke-width="1.5" opacity="0.9"/>
-          <text x="60" y="325" font-size="14" font-weight="600" fill="#1a2734">输出校验层 · Output &amp; Validation</text>
+          <text x="60" y="325" font-size="14" font-weight="600" fill="#1a2734">输出校验层</text>
           <text x="60" y="345" font-size="12" fill="#5a6b7d">Pillow 读取 RGBA · Alpha 通道校验 · 彩色像素统计 · out/*.png 落盘</text>
           <g transform="translate(520, 312)">
             <rect width="120" height="22" rx="6" fill="white" stroke="#e94578" stroke-width="1" opacity="0.8"/>
@@ -685,7 +685,7 @@
     <div class="diagram-card">
       <div class="diagram-header">
         <h4>数据流图</h4>
-        <span class="diagram-tag">data flow</span>
+        <span class="diagram-tag">数据流</span>
       </div>
       <div class="diagram-body" id="flow-diagram">
         <svg class="arch" viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg">
@@ -883,62 +883,62 @@
     <div class="scene-grid stagger" id="scene-grid">
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#54d6c6;"></span>spectral-terrain</div>
-        <div class="scene-family">3D surface</div>
+        <div class="scene-family">三维曲面</div>
         <div class="scene-use">地形分析 · 多频高程分量</div>
       </div>
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#54d6c6;"></span>vortex-streamlines</div>
-        <div class="scene-family">streamlines</div>
+        <div class="scene-family">流线场</div>
         <div class="scene-use">流体动力学 · 涡旋流线</div>
       </div>
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#7b9cff;"></span>wave-isosurface</div>
-        <div class="scene-family">isosurface</div>
+        <div class="scene-family">等值面</div>
         <div class="scene-use">波动物理 · 干涉等值面</div>
       </div>
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#7b9cff;"></span>gyroid-lattice</div>
-        <div class="scene-family">implicit surface</div>
+        <div class="scene-family">隐式曲面</div>
         <div class="scene-use">材料工程 · 三周期极小曲面</div>
       </div>
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#ffd166;"></span>finite-element-stress</div>
-        <div class="scene-family">FEA</div>
+        <div class="scene-family">有限元分析</div>
         <div class="scene-use">结构工程 · 悬臂梁应力</div>
       </div>
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#ff6f91;"></span>molecular-orbitals</div>
-        <div class="scene-family">molecular scene</div>
+        <div class="scene-family">分子场景</div>
         <div class="scene-use">计算化学 · 分子轨道</div>
       </div>
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#54d6c6;"></span>classified-point-cloud</div>
-        <div class="scene-family">point cloud</div>
+        <div class="scene-family">点云</div>
         <div class="scene-use">遥感 · 激光雷达分类</div>
       </div>
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#b889ff;"></span>planetary-routes</div>
-        <div class="scene-family">globe</div>
+        <div class="scene-family">地球曲面</div>
         <div class="scene-use">全球网络 · 测地线路由</div>
       </div>
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#ffd166;"></span>tensor-glyphs</div>
-        <div class="scene-family">glyph field</div>
+        <div class="scene-family">矢量符号场</div>
         <div class="scene-use">扩散分析 · 张量方向场</div>
       </div>
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#ff6f91;"></span>vascular-tree</div>
-        <div class="scene-family">branching tubes</div>
+        <div class="scene-family">分支管结构</div>
         <div class="scene-use">生物医学 · 血管树分支</div>
       </div>
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#7b9cff;"></span>seismic-slices</div>
-        <div class="scene-family">volume slices</div>
+        <div class="scene-family">体切片</div>
         <div class="scene-use">地球物理 · 地震体切片</div>
       </div>
       <div class="scene-card">
         <div class="scene-name"><span class="scene-dot" style="background:#54d6c6;"></span>urban-airflow</div>
-        <div class="scene-family">3D flow scene</div>
+        <div class="scene-family">三维流场场景</div>
         <div class="scene-use">城市气候 · 街区风廊</div>
       </div>
     </div>
@@ -968,7 +968,7 @@
     <div class="diagram-card">
       <div class="diagram-header">
         <h4>质量防线图</h4>
-        <span class="diagram-tag">quality gates</span>
+        <span class="diagram-tag">质量闸门</span>
       </div>
       <div class="diagram-body" id="quality-diagram" style="min-height: 240px;">
         <svg class="arch" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
