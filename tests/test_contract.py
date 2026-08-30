@@ -19,6 +19,7 @@ from pyvista_demos.render import (
 TRANSPARENT = (0, 0, 0, 0)
 COLORFUL = (10, 200, 60, 255)
 GRAY = (100, 100, 100, 255)
+FAINT = (10, 200, 60, 15)
 
 
 def _write_png(
@@ -200,6 +201,43 @@ def test_validate_png_threshold_boundaries(
         assert validate_png(path) == expected
 
 
+@pytest.mark.parametrize(
+    ("name", "bands", "expected"),
+    [
+        (
+            "all three metrics exactly at their floor passes",
+            [(7200, TRANSPARENT), (108600, FAINT), (1700, GRAY), (2500, COLORFUL)],
+            {
+                "scene": "limit",
+                "size": (400, 300),
+                "transparent_pct": 6.0,
+                "visible_pct": 3.5,
+                "colorful": 2500,
+            },
+        ),
+        (
+            "one visible pixel below 3.5% raises while the other two metrics pass",
+            [(7200, TRANSPARENT), (108601, FAINT), (1699, GRAY), (2500, COLORFUL)],
+            "limit-transparent.png: weak RGBA content t=7200 v=4199 c=2500",
+        ),
+    ],
+)
+def test_validate_png_visible_floor_boundary(
+    tmp_path: Path,
+    name: str,
+    bands: list[tuple[int, tuple[int, int, int, int]]],
+    expected: dict[str, object] | str,
+) -> None:
+    path = tmp_path / "limit-transparent.png"
+    _write_png(path, bands, width=400, height=300)
+    if isinstance(expected, str):
+        with pytest.raises(RuntimeError) as excinfo:
+            validate_png(path)
+        assert excinfo.value.args[0] == expected
+    else:
+        assert validate_png(path) == expected
+
+
 def test_validate_png_reports_size_as_width_height(tmp_path: Path) -> None:
     path = tmp_path / "rect-transparent.png"
     _write_png(path, [(600, TRANSPARENT), (5400, COLORFUL)], width=120, height=50)
@@ -231,6 +269,15 @@ def test_new_plotter_applies_shared_scene_dressing() -> None:
         assert plotter.off_screen is True
         assert plotter.background_color.hex_rgba == "#07111fff"
         assert len(plotter.actors) == 2
+        title, subtitle = sorted(
+            plotter.actors.values(), key=lambda actor: actor.position[1], reverse=True
+        )
+        assert title.GetInput() == "TITLE"
+        assert tuple(title.position) == (55.0, 925.0)
+        assert title.prop.color.hex_rgba == "#edf8ffff"
+        assert subtitle.GetInput() == "SUBTITLE"
+        assert tuple(subtitle.position) == (58.0, 886.0)
+        assert subtitle.prop.color.hex_rgba == "#82a0b5ff"
     finally:
         plotter.close()
 
@@ -317,6 +364,22 @@ def test_main_creates_nested_output_directories(
     assert out_dir.is_dir()
 
 
+def test_main_renders_into_an_existing_output_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[tuple[str, Path]] = []
+    monkeypatch.setattr(render_module, "render", _spy_render(calls))
+    out_dir = tmp_path / "gallery"
+    out_dir.mkdir()
+    (out_dir / "stale.txt").write_text("stale")
+    monkeypatch.setattr(
+        sys, "argv", ["render-pyvista-demos", "--scene", "gyroid-lattice", "--out", str(out_dir)]
+    )
+    main()
+    assert calls == [("gyroid-lattice", out_dir / "gyroid-lattice-transparent.png")]
+    assert (out_dir / "stale.txt").read_text() == "stale"
+
+
 def test_main_rejects_unknown_scene(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -332,6 +395,45 @@ def test_main_rejects_unknown_scene(
     assert "invalid choice" in capsys.readouterr().err
     assert calls == []
     assert not out_dir.exists()
+
+
+def test_render_drives_the_plotter_lifecycle_in_order(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    events: list[tuple[object, ...]] = []
+    builds: list[int] = []
+
+    class _SpyPlotter:
+        def show(self, auto_close: bool) -> None:
+            events.append(("show", auto_close))
+
+        def screenshot(self, output: Path, transparent_background: bool) -> None:
+            events.append(("screenshot", output, transparent_background))
+            _write_png(output, [(6000, TRANSPARENT), (54000, COLORFUL)], width=200, height=300)
+
+        def close(self) -> None:
+            events.append(("close",))
+
+    def _builder() -> _SpyPlotter:
+        builds.append(1)
+        return _SpyPlotter()
+
+    monkeypatch.setitem(BUILDERS, "stub-scene", _builder)
+    output = tmp_path / "stub-scene-transparent.png"
+    report = render_module.render("stub-scene", output)
+    assert builds == [1]
+    assert events == [
+        ("show", False),
+        ("screenshot", output, True),
+        ("close",),
+    ]
+    assert report == {
+        "scene": "stub-scene",
+        "size": (200, 300),
+        "transparent_pct": 10.0,
+        "visible_pct": 90.0,
+        "colorful": 54000,
+    }
 
 
 def test_render_rejects_unknown_scene(tmp_path: Path) -> None:
