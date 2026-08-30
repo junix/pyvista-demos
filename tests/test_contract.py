@@ -21,8 +21,9 @@ COLORFUL = (10, 200, 60, 255)
 GRAY = (100, 100, 100, 255)
 
 
-def _write_png(path: Path, bands: list[tuple[int, tuple[int, int, int, int]]]) -> None:
-    width = height = 100
+def _write_png(
+    path: Path, bands: list[tuple[int, tuple[int, int, int, int]]], width: int = 100, height: int = 100
+) -> None:
     assert sum(count for count, _ in bands) == width * height
     image = Image.new("RGBA", (width, height))
     pixels = image.load()
@@ -73,7 +74,11 @@ def test_validate_png_reports_exact_metrics(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize(
     ("filename", "scene"),
-    [("demo-transparent.png", "demo"), ("plain.png", "plain")],
+    [
+        ("demo-transparent.png", "demo"),
+        ("plain.png", "plain"),
+        ("grid-transparent-transparent.png", "grid-transparent"),
+    ],
 )
 def test_validate_png_derives_scene_name(tmp_path: Path, filename: str, scene: str) -> None:
     path = tmp_path / filename
@@ -166,6 +171,17 @@ def test_validate_png_rejects_weak_content(
                 "colorful": 9000,
             },
         ),
+        (
+            "alpha exactly 15 is not visible",
+            [(1000, TRANSPARENT), (100, (10, 200, 60, 15)), (8900, COLORFUL)],
+            {
+                "scene": "boundary",
+                "size": (100, 100),
+                "transparent_pct": 10.0,
+                "visible_pct": 89.0,
+                "colorful": 8900,
+            },
+        ),
     ],
 )
 def test_validate_png_threshold_boundaries(
@@ -184,10 +200,35 @@ def test_validate_png_threshold_boundaries(
         assert validate_png(path) == expected
 
 
+def test_validate_png_reports_size_as_width_height(tmp_path: Path) -> None:
+    path = tmp_path / "rect-transparent.png"
+    _write_png(path, [(600, TRANSPARENT), (5400, COLORFUL)], width=120, height=50)
+    assert validate_png(path) == {
+        "scene": "rect",
+        "size": (120, 50),
+        "transparent_pct": 10.0,
+        "visible_pct": 90.0,
+        "colorful": 5400,
+    }
+
+
+def test_validate_png_rounds_percentages_to_one_decimal(tmp_path: Path) -> None:
+    path = tmp_path / "round-transparent.png"
+    _write_png(path, [(3331, TRANSPARENT), (6669, COLORFUL)])
+    assert validate_png(path) == {
+        "scene": "round",
+        "size": (100, 100),
+        "transparent_pct": 33.3,
+        "visible_pct": 66.7,
+        "colorful": 6669,
+    }
+
+
 def test_new_plotter_applies_shared_scene_dressing() -> None:
     plotter = new_plotter("TITLE", "SUBTITLE")
     try:
         assert tuple(plotter.window_size) == (1600, 1000)
+        assert plotter.off_screen is True
         assert plotter.background_color.hex_rgba == "#07111fff"
         assert len(plotter.actors) == 2
     finally:
@@ -228,9 +269,12 @@ def test_main_renders_every_scene_by_default(
     main()
     assert calls == [(scene, out_dir / f"{scene}-transparent.png") for scene in SCENES]
     assert out_dir.is_dir()
-    assert json.loads(capsys.readouterr().out) == [
+    expected = [
         {"scene": scene, "output": str(out_dir / f"{scene}-transparent.png")} for scene in SCENES
     ]
+    out = capsys.readouterr().out
+    assert out == json.dumps(expected, indent=2) + "\n"
+    assert json.loads(out) == expected
 
 
 def test_main_renders_only_the_selected_scene(
@@ -259,14 +303,40 @@ def test_main_defaults_output_to_out_directory(tmp_path: Path, monkeypatch: pyte
     assert (tmp_path / "out").is_dir()
 
 
+def test_main_creates_nested_output_directories(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[tuple[str, Path]] = []
+    monkeypatch.setattr(render_module, "render", _spy_render(calls))
+    out_dir = tmp_path / "deep" / "nested" / "gallery"
+    monkeypatch.setattr(
+        sys, "argv", ["render-pyvista-demos", "--scene", "gyroid-lattice", "--out", str(out_dir)]
+    )
+    main()
+    assert calls == [("gyroid-lattice", out_dir / "gyroid-lattice-transparent.png")]
+    assert out_dir.is_dir()
+
+
 def test_main_rejects_unknown_scene(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     calls: list[tuple[str, Path]] = []
     monkeypatch.setattr(render_module, "render", _spy_render(calls))
-    monkeypatch.setattr(sys, "argv", ["render-pyvista-demos", "--scene", "nope", "--out", str(tmp_path)])
+    out_dir = tmp_path / "never-created"
+    monkeypatch.setattr(
+        sys, "argv", ["render-pyvista-demos", "--scene", "nope", "--out", str(out_dir)]
+    )
     with pytest.raises(SystemExit) as excinfo:
         main()
     assert excinfo.value.code == 2
     assert "invalid choice" in capsys.readouterr().err
     assert calls == []
+    assert not out_dir.exists()
+
+
+def test_render_rejects_unknown_scene(tmp_path: Path) -> None:
+    output = tmp_path / "nope-transparent.png"
+    with pytest.raises(KeyError) as excinfo:
+        render_module.render("nope", output)
+    assert excinfo.value.args[0] == "nope"
+    assert not output.exists()
