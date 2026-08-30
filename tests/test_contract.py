@@ -1,7 +1,45 @@
+import json
+import sys
 from pathlib import Path
 
+import numpy as np
+import pytest
+from PIL import Image
+
 from pyvista_demos import SCENES
-from pyvista_demos.render import BUILDERS, validate_png
+from pyvista_demos import render as render_module
+from pyvista_demos.render import (
+    BUILDERS,
+    _bond,
+    main,
+    new_plotter,
+    validate_png,
+)
+
+TRANSPARENT = (0, 0, 0, 0)
+COLORFUL = (10, 200, 60, 255)
+GRAY = (100, 100, 100, 255)
+
+
+def _write_png(path: Path, bands: list[tuple[int, tuple[int, int, int, int]]]) -> None:
+    width = height = 100
+    assert sum(count for count, _ in bands) == width * height
+    image = Image.new("RGBA", (width, height))
+    pixels = image.load()
+    index = 0
+    for count, rgba in bands:
+        for _ in range(count):
+            pixels[index % width, index // width] = rgba
+            index += 1
+    image.save(path)
+
+
+def _spy_render(calls: list[tuple[str, Path]]):
+    def _render(scene: str, output: Path) -> dict[str, object]:
+        calls.append((scene, output))
+        return {"scene": scene, "output": str(output)}
+
+    return _render
 
 
 def test_every_scene_has_a_builder() -> None:
@@ -13,3 +51,222 @@ def test_rendered_gallery_contract() -> None:
     outputs = [Path("out") / f"{scene}-transparent.png" for scene in SCENES]
     assert all(path.exists() for path in outputs)
     assert all(validate_png(path)["colorful"] > 2500 for path in outputs)
+    for scene, path in zip(SCENES, outputs):
+        report = validate_png(path)
+        assert report["scene"] == scene
+        assert report["size"] == (1600, 1000)
+        assert 6.0 <= report["transparent_pct"] <= 100.0
+        assert 3.5 <= report["visible_pct"] <= 100.0
+
+
+def test_validate_png_reports_exact_metrics(tmp_path: Path) -> None:
+    path = tmp_path / "demo-transparent.png"
+    _write_png(path, [(1000, TRANSPARENT), (9000, COLORFUL)])
+    assert validate_png(path) == {
+        "scene": "demo",
+        "size": (100, 100),
+        "transparent_pct": 10.0,
+        "visible_pct": 90.0,
+        "colorful": 9000,
+    }
+
+
+@pytest.mark.parametrize(
+    ("filename", "scene"),
+    [("demo-transparent.png", "demo"), ("plain.png", "plain")],
+)
+def test_validate_png_derives_scene_name(tmp_path: Path, filename: str, scene: str) -> None:
+    path = tmp_path / filename
+    _write_png(path, [(1000, TRANSPARENT), (9000, COLORFUL)])
+    assert validate_png(path)["scene"] == scene
+
+
+@pytest.mark.parametrize(
+    ("name", "bands", "message"),
+    [
+        ("fully opaque", [(10000, COLORFUL)], "t=0 v=10000 c=10000"),
+        ("near-invisible", [(1000, TRANSPARENT), (9000, (10, 200, 60, 8))], "t=1000 v=0 c=0"),
+        ("monochrome", [(1000, TRANSPARENT), (9000, GRAY)], "t=1000 v=9000 c=0"),
+        (
+            "alpha 16 is visible but not colorful",
+            [(1000, TRANSPARENT), (9000, (10, 200, 60, 16))],
+            "t=1000 v=9000 c=0",
+        ),
+    ],
+)
+def test_validate_png_rejects_weak_content(
+    tmp_path: Path, name: str, bands: list[tuple[int, tuple[int, int, int, int]]], message: str
+) -> None:
+    path = tmp_path / "weak-transparent.png"
+    _write_png(path, bands)
+    with pytest.raises(RuntimeError) as excinfo:
+        validate_png(path)
+    assert excinfo.value.args[0] == f"weak-transparent.png: weak RGBA content {message}"
+
+
+@pytest.mark.parametrize(
+    ("name", "bands", "expected"),
+    [
+        (
+            "transparent fraction exactly 6% passes",
+            [(600, TRANSPARENT), (9400, COLORFUL)],
+            {
+                "scene": "boundary",
+                "size": (100, 100),
+                "transparent_pct": 6.0,
+                "visible_pct": 94.0,
+                "colorful": 9400,
+            },
+        ),
+        (
+            "one pixel below 6% transparency raises",
+            [(599, TRANSPARENT), (9401, COLORFUL)],
+            "boundary-transparent.png: weak RGBA content t=599 v=9401 c=9401",
+        ),
+        (
+            "colorful count exactly 2500 passes",
+            [(1000, TRANSPARENT), (2500, COLORFUL), (6500, GRAY)],
+            {
+                "scene": "boundary",
+                "size": (100, 100),
+                "transparent_pct": 10.0,
+                "visible_pct": 90.0,
+                "colorful": 2500,
+            },
+        ),
+        (
+            "one pixel below 2500 colorful raises",
+            [(1000, TRANSPARENT), (2499, COLORFUL), (6501, GRAY)],
+            "boundary-transparent.png: weak RGBA content t=1000 v=9000 c=2499",
+        ),
+        (
+            "channel spread exactly 24 is not colorful",
+            [(1000, TRANSPARENT), (9000, (0, 24, 0, 255))],
+            "boundary-transparent.png: weak RGBA content t=1000 v=9000 c=0",
+        ),
+        (
+            "channel spread 25 is colorful",
+            [(1000, TRANSPARENT), (9000, (0, 25, 0, 255))],
+            {
+                "scene": "boundary",
+                "size": (100, 100),
+                "transparent_pct": 10.0,
+                "visible_pct": 90.0,
+                "colorful": 9000,
+            },
+        ),
+        (
+            "alpha exactly 17 counts as colorful",
+            [(1000, TRANSPARENT), (9000, (10, 200, 60, 17))],
+            {
+                "scene": "boundary",
+                "size": (100, 100),
+                "transparent_pct": 10.0,
+                "visible_pct": 90.0,
+                "colorful": 9000,
+            },
+        ),
+    ],
+)
+def test_validate_png_threshold_boundaries(
+    tmp_path: Path,
+    name: str,
+    bands: list[tuple[int, tuple[int, int, int, int]]],
+    expected: dict[str, object] | str,
+) -> None:
+    path = tmp_path / "boundary-transparent.png"
+    _write_png(path, bands)
+    if isinstance(expected, str):
+        with pytest.raises(RuntimeError) as excinfo:
+            validate_png(path)
+        assert excinfo.value.args[0] == expected
+    else:
+        assert validate_png(path) == expected
+
+
+def test_new_plotter_applies_shared_scene_dressing() -> None:
+    plotter = new_plotter("TITLE", "SUBTITLE")
+    try:
+        assert tuple(plotter.window_size) == (1600, 1000)
+        assert plotter.background_color.hex_rgba == "#07111fff"
+        assert len(plotter.actors) == 2
+    finally:
+        plotter.close()
+
+
+@pytest.mark.parametrize(
+    ("start", "end", "radius", "expected_radius"),
+    [
+        ((1.0, 2.0, 3.0), (1.0, 2.0, 8.0), None, 0.07),
+        ((1.0, 2.0, 3.0), (4.0, 6.0, 3.0), 0.05, 0.05),
+    ],
+)
+def test_bond_spans_endpoints(
+    start: tuple[float, float, float],
+    end: tuple[float, float, float],
+    radius: float | None,
+    expected_radius: float,
+) -> None:
+    begin, finish = np.asarray(start), np.asarray(end)
+    bond = _bond(begin, finish) if radius is None else _bond(begin, finish, radius=radius)
+    axis = (finish - begin) / np.linalg.norm(finish - begin)
+    projection = (bond.points - begin) @ axis
+    assert projection.min() == pytest.approx(0.0, abs=1e-6)
+    assert projection.max() == pytest.approx(float(np.linalg.norm(finish - begin)))
+    assert bond.center == pytest.approx(tuple((begin + finish) / 2))
+    offsets = np.linalg.norm(bond.points - (begin + np.outer(projection, axis)), axis=1)
+    assert offsets.max() == pytest.approx(expected_radius, abs=1e-3)
+
+
+def test_main_renders_every_scene_by_default(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    calls: list[tuple[str, Path]] = []
+    monkeypatch.setattr(render_module, "render", _spy_render(calls))
+    out_dir = tmp_path / "gallery"
+    monkeypatch.setattr(sys, "argv", ["render-pyvista-demos", "--out", str(out_dir)])
+    main()
+    assert calls == [(scene, out_dir / f"{scene}-transparent.png") for scene in SCENES]
+    assert out_dir.is_dir()
+    assert json.loads(capsys.readouterr().out) == [
+        {"scene": scene, "output": str(out_dir / f"{scene}-transparent.png")} for scene in SCENES
+    ]
+
+
+def test_main_renders_only_the_selected_scene(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    calls: list[tuple[str, Path]] = []
+    monkeypatch.setattr(render_module, "render", _spy_render(calls))
+    out_dir = tmp_path / "gallery"
+    monkeypatch.setattr(
+        sys, "argv", ["render-pyvista-demos", "--scene", "gyroid-lattice", "--out", str(out_dir)]
+    )
+    main()
+    assert calls == [("gyroid-lattice", out_dir / "gyroid-lattice-transparent.png")]
+    assert json.loads(capsys.readouterr().out) == [
+        {"scene": "gyroid-lattice", "output": str(out_dir / "gyroid-lattice-transparent.png")}
+    ]
+
+
+def test_main_defaults_output_to_out_directory(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[tuple[str, Path]] = []
+    monkeypatch.setattr(render_module, "render", _spy_render(calls))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["render-pyvista-demos"])
+    main()
+    assert calls == [(scene, Path("out") / f"{scene}-transparent.png") for scene in SCENES]
+    assert (tmp_path / "out").is_dir()
+
+
+def test_main_rejects_unknown_scene(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    calls: list[tuple[str, Path]] = []
+    monkeypatch.setattr(render_module, "render", _spy_render(calls))
+    monkeypatch.setattr(sys, "argv", ["render-pyvista-demos", "--scene", "nope", "--out", str(tmp_path)])
+    with pytest.raises(SystemExit) as excinfo:
+        main()
+    assert excinfo.value.code == 2
+    assert "invalid choice" in capsys.readouterr().err
+    assert calls == []
