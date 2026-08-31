@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>pyvista-demos — gallery</title>
+<style>
+:root{
+  --bg:#fbfaf8; --panel:#fff; --ink:#16181d; --muted:#5f6570; --faint:#8b929e;
+  --line:#e3e1dc; --accent:#2f6f5e; --chip:#eef1ef; --code:#f6f5f2;
+  --shadow:0 1px 2px rgba(20,22,26,.05),0 8px 24px -12px rgba(20,22,26,.18);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0f1114; --panel:#161a1f; --ink:#e8eaee; --muted:#a2abb8; --faint:#727d8c;
+  --line:#262c34; --accent:#6fd3b0; --chip:#1d232a; --code:#12161a;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+}}
+:root[data-theme=dark]{
+  --bg:#0f1114; --panel:#161a1f; --ink:#e8eaee; --muted:#a2abb8; --faint:#727d8c;
+  --line:#262c34; --accent:#6fd3b0; --chip:#1d232a; --code:#12161a;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Inter,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:56px 28px 96px}
+header{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:40px}
+h1{margin:0;font-size:30px;letter-spacing:-.02em;font-weight:650}
+.tagline{margin:10px 0 0;color:var(--muted);max-width:70ch;font-size:16px}
+.meta{margin-top:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pill{font:12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);
+  background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:6px 11px}
+.pill b{color:var(--ink);font-weight:600}
+.grid{display:grid;gap:26px;grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.shot{margin:0;padding:16px;display:flex;flex-direction:column;gap:10px;
+  align-items:center;justify-content:center;height:250px;border-bottom:1px solid var(--line)}
+.shot.tall{height:400px}
+.shot.checker{background-color:#f2f1ee;background-image:
+  linear-gradient(45deg,#e2e0dc 25%,transparent 25%,transparent 75%,#e2e0dc 75%),
+  linear-gradient(45deg,#e2e0dc 25%,transparent 25%,transparent 75%,#e2e0dc 75%);
+  background-size:16px 16px;background-position:0 0,8px 8px}
+.shot.dark{background:#11151a}
+.shot.light{background:#fff}
+.shot img,.shot video{max-width:100%;max-height:100%;width:auto;height:auto;
+  object-fit:contain;display:block;border-radius:3px}
+.shot.multi img{max-height:calc(50% - 5px)}
+.shot .missing{color:var(--faint);font-size:13px;font-style:italic;text-align:center}
+.body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
+.idx{font:11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--faint);
+  letter-spacing:.09em;text-transform:uppercase}
+h2{margin:0;font-size:17px;font-weight:620;letter-spacing:-.01em}
+.blurb{margin:0;color:var(--muted);font-size:14px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.tag{font:11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);
+  background:var(--chip);border-radius:5px;padding:4px 7px}
+details{margin-top:auto;border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font:12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  color:var(--accent);list-style:none;user-select:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";display:inline-block;transition:transform .15s}
+details[open] summary::before{content:"▾ "}
+pre{margin:12px 0 0;background:var(--code);border:1px solid var(--line);border-radius:8px;
+  padding:14px;overflow-x:auto;font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;
+  max-height:440px;overflow-y:auto}
+pre .c{color:var(--faint);font-style:italic}
+pre .s{color:var(--accent)}
+pre .n{color:#b1784f}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) pre .n{color:#d8a06a}}
+:root[data-theme=dark] pre .n{color:#d8a06a}
+.extra{font:11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--faint)}
+footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);
+  color:var(--faint);font-size:13px}
+footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
+  font:12px/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>pyvista-demos</h1>
+    <p class="tagline">Twelve scientific 3-D scenes rendered off-screen through PyVista and VTK — terrain, streamlines, isosurfaces, lattices, stress fields, orbitals, point clouds and tensor glyphs.</p>
+    <div class="meta"><span class="pill">PyVista · VTK</span><span class="pill"><b>12</b> demos</span><span class="pill"><b>12</b> rendered</span></div>
+  </header>
+  <main class="grid">
+      <article class="card">
+        <figure class="shot light"><img src="out/spectral-terrain-transparent.png" alt="Spectral terrain" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">01 · 3D surface</div>
+          <h2>Spectral terrain</h2>
+          <p class="blurb">How do multi-frequency components shape a surface?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">terrain</span><span class="tag">contours</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def spectral_terrain() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;SPECTRAL TERRAIN&quot;</span>, <span class="s">&quot;SYNTHETIC ELEVATION / CONTOUR FREQUENCY&quot;</span>)
+    x = np.linspace(-<span class="n">5.5</span>, <span class="n">5.5</span>, <span class="n">180</span>)
+    y = np.linspace(-<span class="n">4.1</span>, <span class="n">4.1</span>, <span class="n">150</span>)
+    xx, yy = np.meshgrid(x, y, indexing=<span class="s">&quot;ij&quot;</span>)
+    zz = <span class="n">0.7</span> * np.sin(xx * <span class="n">1.2</span>) * np.cos(yy * <span class="n">1.45</span>) + <span class="n">0.28</span> * np.sin((xx + yy) * <span class="n">3.1</span>)
+    zz += <span class="n">0.18</span> * np.cos(np.sqrt(xx**<span class="n">2</span> + yy**<span class="n">2</span>) * <span class="n">5.0</span>)
+    grid = pv.StructuredGrid(xx, yy, zz)
+    grid[<span class="s">&quot;elevation&quot;</span>] = zz.ravel(order=<span class="s">&quot;F&quot;</span>)
+    plotter.add_mesh(
+        grid,
+        scalars=<span class="s">&quot;elevation&quot;</span>,
+        cmap=[<span class="s">&quot;#172d54&quot;</span>, <span class="s">&quot;#346cb3&quot;</span>, <span class="s">&quot;#54d6c6&quot;</span>, <span class="s">&quot;#ffd166&quot;</span>, <span class="s">&quot;#ff6f91&quot;</span>],
+        smooth_shading=True,
+        specular=<span class="n">0.45</span>,
+        metallic=<span class="n">0.18</span>,
+        show_scalar_bar=False,
+    )
+    contours = grid.contour(isosurfaces=<span class="n">16</span>, scalars=<span class="s">&quot;elevation&quot;</span>)
+    plotter.add_mesh(contours, color=<span class="s">&quot;#d8f7ff&quot;</span>, line_width=<span class="n">1.2</span>, opacity=<span class="n">0.24</span>)
+    plotter.camera_position = [(<span class="n">11.8</span>, -<span class="n">12.5</span>, <span class="n">9.5</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">0</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+</code></pre></details>
+        </div>
+      </article>
+      <article class="card">
+        <figure class="shot light"><img src="out/vortex-streamlines-transparent.png" alt="Vortex streamlines" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">02 · streamlines</div>
+          <h2>Vortex streamlines</h2>
+          <p class="blurb">How does a 3D vortex transport seeded particles?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">CFD</span><span class="tag">vectors</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def vortex_streamlines() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;VORTEX CHAMBER&quot;</span>, <span class="s">&quot;VECTOR FIELD / SEEDED STREAMLINES&quot;</span>)
+    grid = pv.ImageData(dimensions=(<span class="n">44</span>, <span class="n">44</span>, <span class="n">34</span>), spacing=(<span class="n">0.22</span>, <span class="n">0.22</span>, <span class="n">0.22</span>), origin=(-<span class="n">4.7</span>, -<span class="n">4.7</span>, -<span class="n">3.6</span>))
+    points = grid.points
+    x, y, z = points[:, <span class="n">0</span>], points[:, <span class="n">1</span>], points[:, <span class="n">2</span>]
+    radial = np.sqrt(x**<span class="n">2</span> + y**<span class="n">2</span>) + <span class="n">0.25</span>
+    vectors = np.column_stack((-y / radial, x / radial, <span class="n">0.32</span> * np.sin(radial * <span class="n">1.8</span>) - <span class="n">0.08</span> * z))
+    vectors *= np.exp(-<span class="n">0.035</span> * (x**<span class="n">2</span> + y**<span class="n">2</span> + z**<span class="n">2</span>))[:, None] + <span class="n">0.28</span>
+    grid[<span class="s">&quot;vectors&quot;</span>] = vectors
+    grid[<span class="s">&quot;speed&quot;</span>] = np.linalg.norm(vectors, axis=<span class="n">1</span>)
+    seeds = pv.Disc(inner=<span class="n">0.3</span>, outer=<span class="n">3.7</span>, r_res=<span class="n">7</span>, c_res=<span class="n">32</span>)
+    stream = grid.streamlines_from_source(
+        seeds,
+        vectors=<span class="s">&quot;vectors&quot;</span>,
+        max_step_length=<span class="n">0.12</span>,
+        max_length=<span class="n">18</span>,
+        integration_direction=<span class="s">&quot;both&quot;</span>,
+    )
+    tubes = stream.tube(radius=<span class="n">0.025</span>, scalars=<span class="s">&quot;speed&quot;</span>, radius_factor=<span class="n">3.2</span>)
+    plotter.add_mesh(
+        tubes,
+        scalars=<span class="s">&quot;speed&quot;</span>,
+        cmap=[<span class="s">&quot;#54d6c6&quot;</span>, <span class="s">&quot;#7b9cff&quot;</span>, <span class="s">&quot;#ff6f91&quot;</span>, <span class="s">&quot;#ffd166&quot;</span>],
+        opacity=<span class="n">0.88</span>,
+        show_scalar_bar=False,
+    )
+    shell = pv.Sphere(radius=<span class="n">4.25</span>, theta_resolution=<span class="n">64</span>, phi_resolution=<span class="n">40</span>)
+    plotter.add_mesh(shell, style=<span class="s">&quot;wireframe&quot;</span>, color=<span class="s">&quot;#83a3ba&quot;</span>, opacity=<span class="n">0.09</span>, line_width=<span class="n">1</span>)
+    plotter.camera_position = [(<span class="n">10.5</span>, -<span class="n">11.8</span>, <span class="n">7.7</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">0</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+</code></pre></details>
+        </div>
+      </article>
+      <article class="card">
+        <figure class="shot light"><img src="out/wave-isosurface-transparent.png" alt="Wave isosurface" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">03 · isosurface</div>
+          <h2>Wave isosurface</h2>
+          <p class="blurb">Where do two spherical sources interfere?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">volume</span><span class="tag">waves</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def wave_isosurface() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;WAVE ISOSURFACES&quot;</span>, <span class="s">&quot;THREE-DIMENSIONAL INTERFERENCE FIELD&quot;</span>)
+    grid = pv.ImageData(dimensions=(<span class="n">88</span>, <span class="n">88</span>, <span class="n">88</span>), spacing=(<span class="n">0.1</span>, <span class="n">0.1</span>, <span class="n">0.1</span>), origin=(-<span class="n">4.35</span>, -<span class="n">4.35</span>, -<span class="n">4.35</span>))
+    x, y, z = grid.points.T
+    r1 = np.sqrt((x + <span class="n">1.8</span>) ** <span class="n">2</span> + y**<span class="n">2</span> + z**<span class="n">2</span>)
+    r2 = np.sqrt((x - <span class="n">1.8</span>) ** <span class="n">2</span> + y**<span class="n">2</span> + z**<span class="n">2</span>)
+    field = np.sin(<span class="n">3.2</span> * r1) / (r1 + <span class="n">0.45</span>) + np.sin(<span class="n">3.2</span> * r2 + <span class="n">0.7</span>) / (r2 + <span class="n">0.45</span>)
+    grid[<span class="s">&quot;field&quot;</span>] = field
+    for value, color, opacity in (
+        (-<span class="n">0.45</span>, PALETTE[<span class="n">3</span>], <span class="n">0.23</span>),
+        (<span class="n">0.0</span>, PALETTE[<span class="n">0</span>], <span class="n">0.18</span>),
+        (<span class="n">0.45</span>, PALETTE[<span class="n">2</span>], <span class="n">0.28</span>),
+    ):
+        surface = grid.contour([value], scalars=<span class="s">&quot;field&quot;</span>)
+        plotter.add_mesh(surface, color=color, opacity=opacity, smooth_shading=True, specular=<span class="n">0.65</span>)
+    for center, color in (((-<span class="n">1.8</span>, <span class="n">0</span>, <span class="n">0</span>), PALETTE[<span class="n">1</span>]), ((<span class="n">1.8</span>, <span class="n">0</span>, <span class="n">0</span>), PALETTE[<span class="n">4</span>])):
+        plotter.add_mesh(pv.Sphere(radius=<span class="n">0.24</span>, center=center), color=color, emissive=True)
+    plotter.camera_position = [(<span class="n">11.7</span>, -<span class="n">10.8</span>, <span class="n">8.4</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">0</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+</code></pre></details>
+        </div>
+      </article>
+      <article class="card">
+        <figure class="shot light"><img src="out/gyroid-lattice-transparent.png" alt="Gyroid lattice" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">04 · implicit surface</div>
+          <h2>Gyroid lattice</h2>
+          <p class="blurb">How does a bicontinuous lattice partition volume?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">gyroid</span><span class="tag">materials</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def gyroid_lattice() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;GYROID LATTICE&quot;</span>, <span class="s">&quot;TRIPLY PERIODIC MINIMAL SURFACE / POROSITY STUDY&quot;</span>)
+    grid = pv.ImageData(dimensions=(<span class="n">76</span>, <span class="n">76</span>, <span class="n">76</span>), spacing=(<span class="n">0.11</span>, <span class="n">0.11</span>, <span class="n">0.11</span>), origin=(-<span class="n">4.12</span>, -<span class="n">4.12</span>, -<span class="n">4.12</span>))
+    x, y, z = grid.points.T
+    field = np.sin(x) * np.cos(y) + np.sin(y) * np.cos(z) + np.sin(z) * np.cos(x)
+    grid[<span class="s">&quot;gyroid&quot;</span>] = field
+    for value, color, opacity in ((-<span class="n">0.38</span>, PALETTE[<span class="n">3</span>], <span class="n">0.34</span>), (<span class="n">0.38</span>, PALETTE[<span class="n">0</span>], <span class="n">0.42</span>)):
+        shell = grid.contour([value], scalars=<span class="s">&quot;gyroid&quot;</span>)
+        plotter.add_mesh(shell, color=color, opacity=opacity, smooth_shading=True, specular=<span class="n">0.55</span>)
+    plotter.add_mesh(
+        pv.Box(bounds=(-<span class="n">4.15</span>, <span class="n">4.15</span>, -<span class="n">4.15</span>, <span class="n">4.15</span>, -<span class="n">4.15</span>, <span class="n">4.15</span>)),
+        style=<span class="s">&quot;wireframe&quot;</span>,
+        color=<span class="s">&quot;#7896ab&quot;</span>,
+        opacity=<span class="n">0.17</span>,
+    )
+    plotter.camera_position = [(<span class="n">12.2</span>, -<span class="n">11.6</span>, <span class="n">9.0</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">0</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+</code></pre></details>
+        </div>
+      </article>
+      <article class="card">
+        <figure class="shot light"><img src="out/finite-element-stress-transparent.png" alt="Finite element stress" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">05 · FEA</div>
+          <h2>Finite element stress</h2>
+          <p class="blurb">Where does a loaded cantilever concentrate stress?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">stress</span><span class="tag">mesh</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def finite_element_stress() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;CANTILEVER STRESS&quot;</span>, <span class="s">&quot;FINITE-ELEMENT DISPLACEMENT / VON MISES ENVELOPE&quot;</span>)
+    x = np.linspace(<span class="n">0</span>, <span class="n">10</span>, <span class="n">88</span>)
+    y = np.linspace(-<span class="n">1.4</span>, <span class="n">1.4</span>, <span class="n">28</span>)
+    z = np.linspace(-<span class="n">0.55</span>, <span class="n">0.55</span>, <span class="n">16</span>)
+    xx, yy, zz = np.meshgrid(x, y, z, indexing=<span class="s">&quot;ij&quot;</span>)
+    displacement = -<span class="n">0.025</span> * xx**<span class="n">2</span> * (<span class="n">1</span> - <span class="n">0.1</span> * yy**<span class="n">2</span>)
+    warped = pv.StructuredGrid(xx, yy, zz + displacement)
+    stress = (<span class="n">1</span> - xx / <span class="n">11</span>) * (<span class="n">0.25</span> + np.abs(yy) / <span class="n">1.4</span>) + <span class="n">0.12</span> * np.cos(xx * <span class="n">2.4</span>)
+    warped[<span class="s">&quot;von_mises&quot;</span>] = stress.ravel(order=<span class="s">&quot;F&quot;</span>)
+    plotter.add_mesh(
+        warped,
+        scalars=<span class="s">&quot;von_mises&quot;</span>,
+        cmap=[<span class="s">&quot;#173f3e&quot;</span>, <span class="s">&quot;#54d6c6&quot;</span>, <span class="s">&quot;#ffd166&quot;</span>, <span class="s">&quot;#ff6f91&quot;</span>],
+        smooth_shading=True,
+        show_edges=True,
+        edge_color=<span class="s">&quot;#d8f7ff&quot;</span>,
+        line_width=<span class="n">0.25</span>,
+        show_scalar_bar=False,
+    )
+    plotter.add_mesh(pv.Box(bounds=(-<span class="n">0.35</span>, <span class="n">0</span>, -<span class="n">2.0</span>, <span class="n">2.0</span>, -<span class="n">1.1</span>, <span class="n">1.1</span>)), color=<span class="s">&quot;#7b9cff&quot;</span>, opacity=<span class="n">0.32</span>)
+    for y0 in np.linspace(-<span class="n">1.1</span>, <span class="n">1.1</span>, <span class="n">5</span>):
+        plotter.add_mesh(pv.Arrow(start=(<span class="n">10</span>, y0, -<span class="n">2.7</span>), direction=(<span class="n">0</span>, <span class="n">0</span>, -<span class="n">1</span>), scale=<span class="n">0.9</span>), color=<span class="s">&quot;#ff6f91&quot;</span>)
+    plotter.camera_position = [(<span class="n">13.5</span>, -<span class="n">14.0</span>, <span class="n">8.5</span>), (<span class="n">4.8</span>, <span class="n">0</span>, -<span class="n">1.0</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+</code></pre></details>
+        </div>
+      </article>
+      <article class="card">
+        <figure class="shot light"><img src="out/molecular-orbitals-transparent.png" alt="Molecular orbitals" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">06 · molecular scene</div>
+          <h2>Molecular orbitals</h2>
+          <p class="blurb">How do molecular geometry and orbital lobes align?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">chemistry</span><span class="tag">orbitals</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def molecular_orbitals() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;MOLECULAR ORBITALS&quot;</span>, <span class="s">&quot;ATOM GEOMETRY / BONDS / ELECTRON-DENSITY LOBES&quot;</span>)
+    atoms = np.array(
+        [
+            (
+                np.cos(i * <span class="n">0.74</span>) * (<span class="n">2.0</span> + <span class="n">0.035</span> * i),
+                np.sin(i * <span class="n">0.74</span>) * (<span class="n">1.7</span> + <span class="n">0.025</span> * i),
+                <span class="n">0.5</span> * np.sin(i * <span class="n">1.13</span>),
+            )
+            for i in range(<span class="n">24</span>)
+        ]
+    )
+    atom_colors = [PALETTE[i % len(PALETTE)] for i in range(len(atoms))]
+    for i, point in enumerate(atoms):
+        plotter.add_mesh(
+            pv.Sphere(radius=<span class="n">0.18</span> + <span class="n">0.035</span> * (i % <span class="n">4</span>), center=point),
+            color=atom_colors[i],
+            smooth_shading=True,
+            specular=<span class="n">0.65</span>,
+        )
+        if i:
+            plotter.add_mesh(_bond(atoms[i - <span class="n">1</span>], point), color=<span class="s">&quot;#8fa9bc&quot;</span>, smooth_shading=True)
+    for i in range(<span class="n">3</span>, <span class="n">22</span>, <span class="n">6</span>):
+        plotter.add_mesh(_bond(atoms[i], atoms[(i + <span class="n">7</span>) % len(atoms)], <span class="n">0.045</span>), color=<span class="s">&quot;#ffd166&quot;</span>)
+    for center, direction, color in (
+        ((-<span class="n">1.5</span>, <span class="n">0</span>, <span class="n">0</span>), (<span class="n">1</span>, <span class="n">0.4</span>, <span class="n">0.1</span>), PALETTE[<span class="n">3</span>]),
+        ((<span class="n">1.3</span>, <span class="n">0.3</span>, <span class="n">0</span>), (-<span class="n">0.6</span>, <span class="n">1</span>, <span class="n">0.2</span>), PALETTE[<span class="n">2</span>]),
+    ):
+        for sign in (-<span class="n">1</span>, <span class="n">1</span>):
+            lobe = pv.ParametricEllipsoid(<span class="n">0.75</span>, <span class="n">0.35</span>, <span class="n">0.3</span>)
+            lobe.translate(np.asarray(center) + sign * np.asarray(direction) * <span class="n">0.52</span>, inplace=True)
+            plotter.add_mesh(lobe, color=color, opacity=<span class="n">0.16</span>, smooth_shading=True)
+    plotter.camera_position = [(<span class="n">8.8</span>, -<span class="n">9.8</span>, <span class="n">6.7</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">0</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+</code></pre></details>
+        </div>
+      </article>
+      <article class="card">
+        <figure class="shot light"><img src="out/classified-point-cloud-transparent.png" alt="Classified point cloud" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">07 · point cloud</div>
+          <h2>Classified point cloud</h2>
+          <p class="blurb">How are ground, canopy, and structures separated?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">lidar</span><span class="tag">classification</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def classified_point_cloud() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;CLASSIFIED LIDAR&quot;</span>, <span class="s">&quot;GROUND / CANOPY / STRUCTURES / OUTLIERS&quot;</span>)
+    rng = np.random.default_rng(<span class="n">42</span>)
+    ground_xy = rng.uniform(-<span class="n">5</span>, <span class="n">5</span>, size=(<span class="n">9000</span>, <span class="n">2</span>))
+    ground_z = <span class="n">0.18</span> * np.sin(ground_xy[:, <span class="n">0</span>]) + <span class="n">0.12</span> * np.cos(ground_xy[:, <span class="n">1</span>] * <span class="n">1.7</span>)
+    ground = np.column_stack((ground_xy, ground_z))
+    canopy_xy = rng.normal(size=(<span class="n">5200</span>, <span class="n">2</span>)) * <span class="n">2.8</span>
+    canopy_z = <span class="n">1.2</span> + <span class="n">2.8</span> * np.exp(-<span class="n">0.08</span> * np.sum(canopy_xy**<span class="n">2</span>, axis=<span class="n">1</span>)) + rng.normal(<span class="n">0</span>, <span class="n">0.35</span>, len(canopy_xy))
+    canopy = np.column_stack((canopy_xy, canopy_z))
+    facade = np.column_stack((rng.uniform(-<span class="n">2.1</span>, <span class="n">2.1</span>, <span class="n">1800</span>), np.full(<span class="n">1800</span>, <span class="n">3.4</span>), rng.uniform(<span class="n">0.2</span>, <span class="n">4.5</span>, <span class="n">1800</span>)))
+    points = np.vstack((ground, canopy, facade))
+    classes = np.concatenate((np.zeros(len(ground)), np.ones(len(canopy)), np.full(len(facade), <span class="n">2</span>)))
+    cloud = pv.PolyData(points)
+    cloud[<span class="s">&quot;class&quot;</span>] = classes
+    plotter.add_mesh(
+        cloud,
+        scalars=<span class="s">&quot;class&quot;</span>,
+        cmap=[PALETTE[<span class="n">3</span>], PALETTE[<span class="n">0</span>], PALETTE[<span class="n">2</span>]],
+        clim=(<span class="n">0</span>, <span class="n">2</span>),
+        point_size=<span class="n">5</span>,
+        render_points_as_spheres=True,
+        show_scalar_bar=False,
+    )
+    plotter.add_mesh(
+        pv.Box(bounds=(-<span class="n">2.3</span>, <span class="n">2.3</span>, <span class="n">3.2</span>, <span class="n">3.6</span>, <span class="n">0</span>, <span class="n">4.7</span>)), style=<span class="s">&quot;wireframe&quot;</span>, color=<span class="s">&quot;#ffd166&quot;</span>, opacity=<span class="n">0.45</span>
+    )
+    plotter.camera_position = [(<span class="n">10.5</span>, -<span class="n">12.8</span>, <span class="n">8.5</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1.2</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+</code></pre></details>
+        </div>
+      </article>
+      <article class="card">
+        <figure class="shot light"><img src="out/planetary-routes-transparent.png" alt="Planetary routes" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">08 · globe</div>
+          <h2>Planetary routes</h2>
+          <p class="blurb">How do elevated routes connect distributed stations?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">geodesic</span><span class="tag">routes</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def planetary_routes() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;PLANETARY ROUTES&quot;</span>, <span class="s">&quot;GEODESIC ARCS / STATION COVERAGE / ORBITAL SHELL&quot;</span>)
+    globe = pv.Sphere(radius=<span class="n">3.25</span>, theta_resolution=<span class="n">96</span>, phi_resolution=<span class="n">64</span>)
+    plotter.add_mesh(globe, color=<span class="s">&quot;#163252&quot;</span>, opacity=<span class="n">0.62</span>, smooth_shading=True, specular=<span class="n">0.5</span>)
+    plotter.add_mesh(globe, style=<span class="s">&quot;wireframe&quot;</span>, color=<span class="s">&quot;#54d6c6&quot;</span>, opacity=<span class="n">0.09</span>, line_width=<span class="n">0.6</span>)
+    stations = np.array(
+        [(<span class="n">2.6</span>, <span class="n">1.4</span>, <span class="n">1.3</span>), (-<span class="n">2.4</span>, <span class="n">1.8</span>, <span class="n">1.2</span>), (-<span class="n">1.6</span>, -<span class="n">2.2</span>, <span class="n">1.7</span>), (<span class="n">2.1</span>, -<span class="n">2.2</span>, -<span class="n">1.0</span>), (<span class="n">0.3</span>, <span class="n">2.4</span>, -<span class="n">2.1</span>)]
+    )
+    stations = stations / np.linalg.norm(stations, axis=<span class="n">1</span>)[:, None] * <span class="n">3.28</span>
+    for i, start in enumerate(stations):
+        plotter.add_mesh(pv.Sphere(radius=<span class="n">0.13</span>, center=start), color=PALETTE[i], emissive=True)
+        end = stations[(i + <span class="n">2</span>) % len(stations)]
+        t = np.linspace(<span class="n">0</span>, <span class="n">1</span>, <span class="n">80</span>)
+        curve = (<span class="n">1</span> - t[:, None]) * start + t[:, None] * end
+        curve = curve / np.linalg.norm(curve, axis=<span class="n">1</span>)[:, None] * (<span class="n">3.3</span> + <span class="n">1.1</span> * np.sin(np.pi * t))[:, None]
+        plotter.add_mesh(pv.Spline(curve, <span class="n">240</span>).tube(radius=<span class="n">0.035</span>), color=PALETTE[i], opacity=<span class="n">0.84</span>)
+    plotter.add_mesh(
+        pv.Sphere(radius=<span class="n">4.65</span>, theta_resolution=<span class="n">72</span>, phi_resolution=<span class="n">48</span>),
+        style=<span class="s">&quot;wireframe&quot;</span>,
+        color=<span class="s">&quot;#7b9cff&quot;</span>,
+        opacity=<span class="n">0.06</span>,
+    )
+    plotter.camera_position = [(<span class="n">9.8</span>, -<span class="n">10.7</span>, <span class="n">7.4</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">0</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+</code></pre></details>
+        </div>
+      </article>
+      <article class="card">
+        <figure class="shot light"><img src="out/tensor-glyphs-transparent.png" alt="Tensor glyphs" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">09 · glyph field</div>
+          <h2>Tensor glyphs</h2>
+          <p class="blurb">How do principal directions vary through a volume?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">tensor</span><span class="tag">glyphs</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def tensor_glyphs() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;TENSOR ORIENTATION FIELD&quot;</span>, <span class="s">&quot;PRINCIPAL DIRECTION / ANISOTROPY / MAGNITUDE&quot;</span>)
+    xx, yy, zz = np.meshgrid(
+        np.linspace(-<span class="n">4</span>, <span class="n">4</span>, <span class="n">13</span>), np.linspace(-<span class="n">3</span>, <span class="n">3</span>, <span class="n">10</span>), np.linspace(-<span class="n">2</span>, <span class="n">2</span>, <span class="n">7</span>), indexing=<span class="s">&quot;ij&quot;</span>
+    )
+    points = np.column_stack((xx.ravel(), yy.ravel(), zz.ravel()))
+    cloud = pv.PolyData(points)
+    vectors = np.column_stack((-points[:, <span class="n">1</span>], points[:, <span class="n">0</span>] + <span class="n">0.4</span> * points[:, <span class="n">2</span>], <span class="n">0.7</span> * np.sin(points[:, <span class="n">0</span>])))
+    magnitude = np.linalg.norm(vectors, axis=<span class="n">1</span>)
+    vectors /= np.maximum(magnitude[:, None], <span class="n">1</span>e-<span class="n">6</span>)
+    cloud[<span class="s">&quot;vectors&quot;</span>] = vectors
+    cloud[<span class="s">&quot;magnitude&quot;</span>] = magnitude
+    glyphs = cloud.glyph(
+        orient=<span class="s">&quot;vectors&quot;</span>,
+        scale=<span class="s">&quot;magnitude&quot;</span>,
+        factor=<span class="n">0.16</span>,
+        geom=pv.Arrow(tip_length=<span class="n">0.28</span>, tip_radius=<span class="n">0.1</span>, shaft_radius=<span class="n">0.035</span>),
+    )
+    plotter.add_mesh(
+        glyphs,
+        scalars=<span class="s">&quot;magnitude&quot;</span>,
+        cmap=[PALETTE[<span class="n">0</span>], PALETTE[<span class="n">3</span>], PALETTE[<span class="n">2</span>], PALETTE[<span class="n">1</span>]],
+        opacity=<span class="n">0.82</span>,
+        show_scalar_bar=False,
+    )
+    plotter.add_mesh(
+        pv.Box(bounds=(-<span class="n">4.4</span>, <span class="n">4.4</span>, -<span class="n">3.4</span>, <span class="n">3.4</span>, -<span class="n">2.4</span>, <span class="n">2.4</span>)), style=<span class="s">&quot;wireframe&quot;</span>, color=<span class="s">&quot;#7896ab&quot;</span>, opacity=<span class="n">0.16</span>
+    )
+    plotter.camera_position = [(<span class="n">12.5</span>, -<span class="n">12.8</span>, <span class="n">9.5</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">0</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+</code></pre></details>
+        </div>
+      </article>
+      <article class="card">
+        <figure class="shot light"><img src="out/vascular-tree-transparent.png" alt="Vascular tree" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">10 · branching tubes</div>
+          <h2>Vascular tree</h2>
+          <p class="blurb">How does radius taper through a branching vessel tree?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">vascular</span><span class="tag">biomedical</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def vascular_tree() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;VASCULAR TREE&quot;</span>, <span class="s">&quot;MULTISCALE BRANCHING / RADIUS TAPER / PERFUSION TERRITORY&quot;</span>)
+    rng = np.random.default_rng(<span class="n">7</span>)
+    frontier = [(np.array([<span class="n">0.0</span>, <span class="n">0.0</span>, -<span class="n">3.5</span>]), np.array([<span class="n">0.0</span>, <span class="n">0.0</span>, <span class="n">1.0</span>]), <span class="n">0.25</span>)]
+    for depth in range(<span class="n">6</span>):
+        next_frontier = []
+        for origin, direction, radius in frontier:
+            length = <span class="n">1.25</span> - depth * <span class="n">0.1</span>
+            end = origin + direction * length
+            plotter.add_mesh(
+                _bond(origin, end, radius), color=PALETTE[min(depth // <span class="n">2</span>, <span class="n">4</span>)], smooth_shading=True
+            )
+            for sign in (-<span class="n">1</span>, <span class="n">1</span>):
+                bend = np.array([sign * (<span class="n">0.42</span> + <span class="n">0.08</span> * rng.random()), <span class="n">0.22</span> * rng.normal(), <span class="n">0.75</span>])
+                bend = bend / np.linalg.norm(bend)
+                next_frontier.append((end, bend, radius * <span class="n">0.69</span>))
+        frontier = next_frontier
+    terminals = pv.PolyData(np.array([origin for origin, _, _ in frontier]))
+    plotter.add_mesh(terminals, color=<span class="s">&quot;#ff6f91&quot;</span>, point_size=<span class="n">9</span>, render_points_as_spheres=True)
+    plotter.add_mesh(pv.Sphere(radius=<span class="n">4.4</span>, center=(<span class="n">0</span>, <span class="n">0</span>, <span class="n">0.2</span>)), color=<span class="s">&quot;#54d6c6&quot;</span>, opacity=<span class="n">0.035</span>)
+    plotter.camera_position = [(<span class="n">9.2</span>, -<span class="n">11.2</span>, <span class="n">6.8</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">0.2</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+</code></pre></details>
+        </div>
+      </article>
+      <article class="card">
+        <figure class="shot light"><img src="out/seismic-slices-transparent.png" alt="Seismic slices" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">11 · volume slices</div>
+          <h2>Seismic slices</h2>
+          <p class="blurb">Where do layered signals break across a fault?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">seismic</span><span class="tag">slices</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def seismic_slices() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;SEISMIC VOLUME&quot;</span>, <span class="s">&quot;ORTHOGONAL SLICES / FAULT PLANE / AMPLITUDE ENVELOPE&quot;</span>)
+    grid = pv.ImageData(dimensions=(<span class="n">82</span>, <span class="n">72</span>, <span class="n">64</span>), spacing=(<span class="n">0.11</span>, <span class="n">0.12</span>, <span class="n">0.13</span>), origin=(-<span class="n">4.45</span>, -<span class="n">4.25</span>, -<span class="n">4.1</span>))
+    x, y, z = grid.points.T
+    layers = np.sin(<span class="n">5.2</span> * (z + <span class="n">0.13</span> * x)) + <span class="n">0.45</span> * np.sin(<span class="n">2.4</span> * y - <span class="n">1.8</span> * z)
+    fault = np.where(x + <span class="n">0.4</span> * y &gt; <span class="n">0.6</span>, <span class="n">0.9</span>, -<span class="n">0.4</span>)
+    amplitude = layers + fault + <span class="n">1.6</span> * np.exp(-<span class="n">0.7</span> * ((x + <span class="n">1.2</span>) ** <span class="n">2</span> + (y - <span class="n">0.7</span>) ** <span class="n">2</span> + (z + <span class="n">0.4</span>) ** <span class="n">2</span>))
+    grid[<span class="s">&quot;amplitude&quot;</span>] = amplitude
+    slices = grid.slice_orthogonal(x=<span class="n">0.2</span>, y=-<span class="n">0.35</span>, z=<span class="n">0.45</span>)
+    plotter.add_mesh(
+        slices,
+        scalars=<span class="s">&quot;amplitude&quot;</span>,
+        cmap=[<span class="s">&quot;#172d54&quot;</span>, <span class="s">&quot;#54d6c6&quot;</span>, <span class="s">&quot;#eef8ff&quot;</span>, <span class="s">&quot;#ffd166&quot;</span>, <span class="s">&quot;#ff6f91&quot;</span>],
+        opacity=<span class="n">0.88</span>,
+        show_scalar_bar=False,
+    )
+    fault_plane = pv.Plane(center=(<span class="n">0.6</span>, <span class="n">0</span>, <span class="n">0</span>), direction=(<span class="n">1</span>, <span class="n">0.4</span>, <span class="n">0</span>), i_size=<span class="n">8</span>, j_size=<span class="n">8</span>)
+    plotter.add_mesh(fault_plane, color=<span class="s">&quot;#ff6f91&quot;</span>, opacity=<span class="n">0.16</span>)
+    plotter.add_mesh(
+        pv.Box(bounds=(-<span class="n">4.5</span>, <span class="n">4.5</span>, -<span class="n">4.3</span>, <span class="n">4.3</span>, -<span class="n">4.2</span>, <span class="n">4.2</span>)), style=<span class="s">&quot;wireframe&quot;</span>, color=<span class="s">&quot;#7896ab&quot;</span>, opacity=<span class="n">0.18</span>
+    )
+    plotter.camera_position = [(<span class="n">12.0</span>, -<span class="n">13.0</span>, <span class="n">9.3</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">0</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+</code></pre></details>
+        </div>
+      </article>
+      <article class="card">
+        <figure class="shot light"><img src="out/urban-airflow-transparent.png" alt="Urban airflow" loading="lazy"></figure>
+        <div class="body">
+          <div class="idx">12 · 3D flow scene</div>
+          <h2>Urban airflow</h2>
+          <p class="blurb">How do wind corridors pass through a building canopy?</p>
+          <div class="tags"><span class="tag">pyvista</span><span class="tag">urban</span><span class="tag">airflow</span><span class="tag">advanced</span></div>
+          <details><summary>src/pyvista_demos/render.py</summary><pre><code>def urban_airflow() -&gt; pv.Plotter:
+    plotter = new_plotter(<span class="s">&quot;URBAN AIRFLOW&quot;</span>, <span class="s">&quot;BUILDING CANOPY / WIND CORRIDORS / TURBULENCE WAKE&quot;</span>)
+    rng = np.random.default_rng(<span class="n">19</span>)
+    for ix in range(-<span class="n">4</span>, <span class="n">5</span>):
+        for iy in range(-<span class="n">3</span>, <span class="n">4</span>):
+            if (ix + iy) % <span class="n">4</span> == <span class="n">0</span>:
+                continue
+            height = <span class="n">0.7</span> + <span class="n">2.8</span> * rng.random()
+            building = pv.Box(bounds=(ix - <span class="n">0.33</span>, ix + <span class="n">0.33</span>, iy - <span class="n">0.33</span>, iy + <span class="n">0.33</span>, <span class="n">0</span>, height))
+            plotter.add_mesh(
+                building,
+                color=PALETTE[(ix + <span class="n">2</span> * iy) % len(PALETTE)],
+                opacity=<span class="n">0.38</span>,
+                show_edges=True,
+                edge_color=<span class="s">&quot;#d8f7ff&quot;</span>,
+                line_width=<span class="n">0.3</span>,
+            )
+    for lane in np.linspace(-<span class="n">2.8</span>, <span class="n">2.8</span>, <span class="n">11</span>):
+        x = np.linspace(-<span class="n">5.2</span>, <span class="n">5.2</span>, <span class="n">130</span>)
+        y = lane + <span class="n">0.18</span> * np.sin(x * <span class="n">1.2</span> + lane)
+        z = <span class="n">0.7</span> + <span class="n">0.45</span> * np.sin(x * <span class="n">0.55</span> + lane) ** <span class="n">2</span>
+        path = pv.Spline(np.column_stack((x, y, z)), <span class="n">320</span>).tube(radius=<span class="n">0.025</span>)
+        plotter.add_mesh(path, color=PALETTE[int((lane + <span class="n">3</span>) * <span class="n">2</span>) % len(PALETTE)], opacity=<span class="n">0.72</span>)
+    plotter.add_mesh(
+        pv.Plane(center=(<span class="n">0</span>, <span class="n">0</span>, -<span class="n">0.02</span>), direction=(<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>), i_size=<span class="n">11</span>, j_size=<span class="n">8</span>),
+        color=<span class="s">&quot;#173f3e&quot;</span>,
+        opacity=<span class="n">0.22</span>,
+    )
+    plotter.camera_position = [(<span class="n">11.8</span>, -<span class="n">13.5</span>, <span class="n">9.2</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1.0</span>), (<span class="n">0</span>, <span class="n">0</span>, <span class="n">1</span>)]
+    return plotter
+
+
+BUILDERS = {
+    <span class="s">&quot;spectral-terrain&quot;</span>: spectral_terrain,
+    <span class="s">&quot;vortex-streamlines&quot;</span>: vortex_streamlines,
+    <span class="s">&quot;wave-isosurface&quot;</span>: wave_isosurface,
+    <span class="s">&quot;gyroid-lattice&quot;</span>: gyroid_lattice,
+    <span class="s">&quot;finite-element-stress&quot;</span>: finite_element_stress,
+    <span class="s">&quot;molecular-orbitals&quot;</span>: molecular_orbitals,
+    <span class="s">&quot;classified-point-cloud&quot;</span>: classified_point_cloud,
+    <span class="s">&quot;planetary-routes&quot;</span>: planetary_routes,
+    <span class="s">&quot;tensor-glyphs&quot;</span>: tensor_glyphs,
+    <span class="s">&quot;vascular-tree&quot;</span>: vascular_tree,
+    <span class="s">&quot;seismic-slices&quot;</span>: seismic_slices,
+    <span class="s">&quot;urban-airflow&quot;</span>: urban_airflow,
+}
+</code></pre></details>
+        </div>
+      </article>
+  </main>
+  <footer>
+    Generated by <code>tools/gallery.py</code> — regenerate with <code>just gallery</code>
+    after <code>just build</code>. Images are referenced from
+    <code>out/</code>, so open this file straight from the checkout.
+  </footer>
+</div>
+</body>
+</html>

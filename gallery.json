@@ -1,0 +1,8 @@
+{
+  "title": "pyvista-demos",
+  "library": "PyVista · VTK",
+  "tagline": "Twelve scientific 3-D scenes rendered off-screen through PyVista and VTK — terrain, streamlines, isosurfaces, lattices, stress fields, orbitals, point clouds and tensor glyphs.",
+  "rebuild": "just build",
+  "backdrop": "light",
+  "code_search": "src/pyvista_demos/render.py"
+}
