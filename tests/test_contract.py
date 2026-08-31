@@ -397,6 +397,27 @@ def test_main_rejects_unknown_scene(
     assert not out_dir.exists()
 
 
+def test_main_aborts_gallery_when_a_scene_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    calls: list[tuple[str, Path]] = []
+
+    def _render(scene: str, output: Path) -> dict[str, object]:
+        calls.append((scene, output))
+        if scene == "wave-isosurface":
+            raise RuntimeError("wave-isosurface: weak RGBA content t=0 v=0 c=0")
+        return {"scene": scene, "output": str(output)}
+
+    monkeypatch.setattr(render_module, "render", _render)
+    out_dir = tmp_path / "gallery"
+    monkeypatch.setattr(sys, "argv", ["render-pyvista-demos", "--out", str(out_dir)])
+    with pytest.raises(RuntimeError) as excinfo:
+        main()
+    assert excinfo.value.args[0] == "wave-isosurface: weak RGBA content t=0 v=0 c=0"
+    assert calls == [(scene, out_dir / f"{scene}-transparent.png") for scene in SCENES[:3]]
+    assert capsys.readouterr().out == ""
+
+
 def test_render_drives_the_plotter_lifecycle_in_order(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -434,6 +455,35 @@ def test_render_drives_the_plotter_lifecycle_in_order(
         "visible_pct": 90.0,
         "colorful": 54000,
     }
+
+
+def test_render_rejects_weak_screenshot_content(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    events: list[tuple[object, ...]] = []
+
+    class _WeakPlotter:
+        def show(self, auto_close: bool) -> None:
+            events.append(("show", auto_close))
+
+        def screenshot(self, output: Path, transparent_background: bool) -> None:
+            events.append(("screenshot", output, transparent_background))
+            _write_png(output, [(60000, COLORFUL)], width=200, height=300)
+
+        def close(self) -> None:
+            events.append(("close",))
+
+    monkeypatch.setitem(BUILDERS, "stub-scene", _WeakPlotter)
+    output = tmp_path / "stub-scene-transparent.png"
+    with pytest.raises(RuntimeError) as excinfo:
+        render_module.render("stub-scene", output)
+    assert excinfo.value.args[0] == "stub-scene-transparent.png: weak RGBA content t=0 v=60000 c=60000"
+    assert events == [
+        ("show", False),
+        ("screenshot", output, True),
+        ("close",),
+    ]
+    assert output.exists()
 
 
 def test_render_rejects_unknown_scene(tmp_path: Path) -> None:
