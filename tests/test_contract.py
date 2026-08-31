@@ -1,3 +1,4 @@
+import errno
 import json
 import sys
 from pathlib import Path
@@ -46,6 +47,7 @@ def _spy_render(calls: list[tuple[str, Path]]):
 
 def test_every_scene_has_a_builder() -> None:
     assert len(SCENES) >= 12
+    assert len(SCENES) == len(set(SCENES))
     assert set(SCENES) == set(BUILDERS)
 
 
@@ -238,6 +240,36 @@ def test_validate_png_visible_floor_boundary(
         assert validate_png(path) == expected
 
 
+def test_validate_png_converts_palette_png_transparency_to_alpha(tmp_path: Path) -> None:
+    image = Image.new("P", (100, 100))
+    image.putpalette([10, 200, 60, 200, 30, 90])
+    pixels = image.load()
+    for index in range(10000):
+        pixels[index % 100, index // 100] = 0 if index < 1000 else 1
+    image.info["transparency"] = 0
+    path = tmp_path / "pal-transparent.png"
+    image.save(path)
+    assert validate_png(path) == {
+        "scene": "pal",
+        "size": (100, 100),
+        "transparent_pct": 10.0,
+        "visible_pct": 90.0,
+        "colorful": 9000,
+    }
+
+
+def test_validate_png_converts_grayscale_png_and_rejects_opaque_content(tmp_path: Path) -> None:
+    image = Image.new("L", (100, 100))
+    pixels = image.load()
+    for index in range(10000):
+        pixels[index % 100, index // 100] = 10 if index < 1000 else 120
+    path = tmp_path / "gray-transparent.png"
+    image.save(path)
+    with pytest.raises(RuntimeError) as excinfo:
+        validate_png(path)
+    assert excinfo.value.args[0] == "gray-transparent.png: weak RGBA content t=0 v=10000 c=0"
+
+
 def test_validate_png_reports_size_as_width_height(tmp_path: Path) -> None:
     path = tmp_path / "rect-transparent.png"
     _write_png(path, [(600, TRANSPARENT), (5400, COLORFUL)], width=120, height=50)
@@ -262,6 +294,60 @@ def test_validate_png_rounds_percentages_to_one_decimal(tmp_path: Path) -> None:
     }
 
 
+@pytest.mark.parametrize(
+    ("name", "bands", "message"),
+    [
+        ("single transparent pixel", [(1, TRANSPARENT)], "t=1 v=0 c=0"),
+        ("single opaque colorful pixel", [(1, COLORFUL)], "t=0 v=1 c=1"),
+    ],
+)
+def test_validate_png_single_pixel_images_always_reject(
+    tmp_path: Path, name: str, bands: list[tuple[int, tuple[int, int, int, int]]], message: str
+) -> None:
+    path = tmp_path / "dot-transparent.png"
+    _write_png(path, bands, width=1, height=1)
+    with pytest.raises(RuntimeError) as excinfo:
+        validate_png(path)
+    assert excinfo.value.args[0] == f"dot-transparent.png: weak RGBA content {message}"
+
+
+@pytest.mark.parametrize(
+    ("name", "bands", "expected"),
+    [
+        (
+            "smallest canvas clearing every floor passes",
+            [(163, TRANSPARENT), (2541, COLORFUL)],
+            {
+                "scene": "scale",
+                "size": (52, 52),
+                "transparent_pct": 6.0,
+                "visible_pct": 94.0,
+                "colorful": 2541,
+            },
+        ),
+        (
+            "one transparent pixel short of the scaled 6% floor raises",
+            [(162, TRANSPARENT), (2542, COLORFUL)],
+            "scale-transparent.png: weak RGBA content t=162 v=2542 c=2542",
+        ),
+    ],
+)
+def test_validate_png_relative_floors_scale_with_canvas_size(
+    tmp_path: Path,
+    name: str,
+    bands: list[tuple[int, tuple[int, int, int, int]]],
+    expected: dict[str, object] | str,
+) -> None:
+    path = tmp_path / "scale-transparent.png"
+    _write_png(path, bands, width=52, height=52)
+    if isinstance(expected, str):
+        with pytest.raises(RuntimeError) as excinfo:
+            validate_png(path)
+        assert excinfo.value.args[0] == expected
+    else:
+        assert validate_png(path) == expected
+
+
 def test_new_plotter_applies_shared_scene_dressing() -> None:
     plotter = new_plotter("TITLE", "SUBTITLE")
     try:
@@ -275,9 +361,11 @@ def test_new_plotter_applies_shared_scene_dressing() -> None:
         assert title.GetInput() == "TITLE"
         assert tuple(title.position) == (55.0, 925.0)
         assert title.prop.color.hex_rgba == "#edf8ffff"
+        assert title.prop.font_family == "arial"
         assert subtitle.GetInput() == "SUBTITLE"
         assert tuple(subtitle.position) == (58.0, 886.0)
         assert subtitle.prop.color.hex_rgba == "#82a0b5ff"
+        assert subtitle.prop.font_family == "arial"
     finally:
         plotter.close()
 
@@ -378,6 +466,25 @@ def test_main_renders_into_an_existing_output_directory(
     main()
     assert calls == [("gyroid-lattice", out_dir / "gyroid-lattice-transparent.png")]
     assert (out_dir / "stale.txt").read_text() == "stale"
+
+
+def test_main_raises_when_output_path_is_an_existing_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    calls: list[tuple[str, Path]] = []
+    monkeypatch.setattr(render_module, "render", _spy_render(calls))
+    out_file = tmp_path / "occupied.txt"
+    out_file.write_text("keep me")
+    monkeypatch.setattr(
+        sys, "argv", ["render-pyvista-demos", "--scene", "gyroid-lattice", "--out", str(out_file)]
+    )
+    with pytest.raises(FileExistsError) as excinfo:
+        main()
+    assert excinfo.value.errno == errno.EEXIST
+    assert str(excinfo.value).endswith(f"'{out_file}'")
+    assert calls == []
+    assert out_file.read_text() == "keep me"
+    assert capsys.readouterr().out == ""
 
 
 def test_main_rejects_unknown_scene(
