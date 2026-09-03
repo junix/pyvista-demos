@@ -1,5 +1,7 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
+install_bin := home_directory() / "sync" / "bin"
+
 default: build
 
 # Sync deps and render every demo into out/ with fixed cameras and
@@ -13,9 +15,15 @@ test: build
     uv run ruff check .
     uv run pytest
 
-# Demos repo — no binary, no launcher (ADR-749: nothing to install).
-install:
-    @echo "pyvista-demos: demos repo, nothing to install"
+# Interpreted CLI launcher (ADR-749).
+install: build
+    #!/usr/bin/env bash
+    mkdir -p "{{ install_bin }}"
+    cat > "{{ install_bin }}/render-pyvista-demos" << 'EOF'
+    #!/usr/bin/env bash
+    cd {{ justfile_directory() }} && uv run render-pyvista-demos "$@"
+    EOF
+    chmod +x "{{ install_bin }}/render-pyvista-demos"
 
 # Remove generated images.
 clean:
