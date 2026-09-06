@@ -32,6 +32,19 @@ h1{margin:0;font-size:30px;letter-spacing:-.02em;font-weight:650}
 .pill{font:12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);
   background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:6px 11px}
 .pill b{color:var(--ink);font-weight:600}
+.controls{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  padding:12px 0;margin:0 0 26px;background:linear-gradient(var(--bg) 80%,transparent)}
+.controls input{flex:1 1 220px;max-width:400px;border:1px solid var(--line);border-radius:10px;
+  background:var(--panel);color:var(--ink);padding:9px 13px;font-size:14px;font-family:inherit}
+.controls input:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);cursor:pointer;
+  background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:6px 11px}
+.chip span{color:var(--faint);margin-left:3px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.chip[aria-pressed="true"] span{color:var(--bg);opacity:.75}
+#count{margin-left:auto;color:var(--muted);font:12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
+#empty{color:var(--muted);font-size:14px}
 .grid{display:grid;gap:26px;grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
   overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
@@ -86,8 +99,14 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
     <p class="tagline">Twelve scientific 3-D scenes rendered off-screen through PyVista and VTK — terrain, streamlines, isosurfaces, lattices, stress fields, orbitals, point clouds and tensor glyphs.</p>
     <div class="meta"><span class="pill">PyVista · VTK</span><span class="pill"><b>12</b> demos</span><span class="pill"><b>12</b> rendered</span></div>
   </header>
+  <section class="controls" aria-label="Gallery filters">
+    <input id="q" type="search" placeholder="Filter by title, blurb, tag, or family…" autocomplete="off" aria-label="Filter demos">
+    
+    <output id="count" aria-live="polite">12 shown</output>
+  </section>
+  <p id="empty" hidden>No demos match the current filter.</p>
   <main class="grid">
-      <article class="card">
+      <article class="card" data-family="3D surface" data-search="spectral terrain how do multi-frequency components shape a surface? pyvista terrain contours advanced 01 · 3d surface 3d surface">
         <figure class="shot light"><img src="out/spectral-terrain-transparent.png" alt="Spectral terrain" loading="lazy"></figure>
         <div class="body">
           <div class="idx">01 · 3D surface</div>
@@ -119,7 +138,7 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
 </code></pre></details>
         </div>
       </article>
-      <article class="card">
+      <article class="card" data-family="streamlines" data-search="vortex streamlines how does a 3d vortex transport seeded particles? pyvista cfd vectors advanced 02 · streamlines streamlines">
         <figure class="shot light"><img src="out/vortex-streamlines-transparent.png" alt="Vortex streamlines" loading="lazy"></figure>
         <div class="body">
           <div class="idx">02 · streamlines</div>
@@ -159,7 +178,7 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
 </code></pre></details>
         </div>
       </article>
-      <article class="card">
+      <article class="card" data-family="isosurface" data-search="wave isosurface where do two spherical sources interfere? pyvista volume waves advanced 03 · isosurface isosurface">
         <figure class="shot light"><img src="out/wave-isosurface-transparent.png" alt="Wave isosurface" loading="lazy"></figure>
         <div class="body">
           <div class="idx">03 · isosurface</div>
@@ -188,7 +207,7 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
 </code></pre></details>
         </div>
       </article>
-      <article class="card">
+      <article class="card" data-family="implicit surface" data-search="gyroid lattice how does a bicontinuous lattice partition volume? pyvista gyroid materials advanced 04 · implicit surface implicit surface">
         <figure class="shot light"><img src="out/gyroid-lattice-transparent.png" alt="Gyroid lattice" loading="lazy"></figure>
         <div class="body">
           <div class="idx">04 · implicit surface</div>
@@ -215,7 +234,7 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
 </code></pre></details>
         </div>
       </article>
-      <article class="card">
+      <article class="card" data-family="FEA" data-search="finite element stress where does a loaded cantilever concentrate stress? pyvista stress mesh advanced 05 · fea fea">
         <figure class="shot light"><img src="out/finite-element-stress-transparent.png" alt="Finite element stress" loading="lazy"></figure>
         <div class="body">
           <div class="idx">05 · FEA</div>
@@ -250,7 +269,7 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
 </code></pre></details>
         </div>
       </article>
-      <article class="card">
+      <article class="card" data-family="molecular scene" data-search="molecular orbitals how do molecular geometry and orbital lobes align? pyvista chemistry orbitals advanced 06 · molecular scene molecular scene">
         <figure class="shot light"><img src="out/molecular-orbitals-transparent.png" alt="Molecular orbitals" loading="lazy"></figure>
         <div class="body">
           <div class="idx">06 · molecular scene</div>
@@ -294,7 +313,7 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
 </code></pre></details>
         </div>
       </article>
-      <article class="card">
+      <article class="card" data-family="point cloud" data-search="classified point cloud how are ground, canopy, and structures separated? pyvista lidar classification advanced 07 · point cloud point cloud">
         <figure class="shot light"><img src="out/classified-point-cloud-transparent.png" alt="Classified point cloud" loading="lazy"></figure>
         <div class="body">
           <div class="idx">07 · point cloud</div>
@@ -332,7 +351,7 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
 </code></pre></details>
         </div>
       </article>
-      <article class="card">
+      <article class="card" data-family="globe" data-search="planetary routes how do elevated routes connect distributed stations? pyvista geodesic routes advanced 08 · globe globe">
         <figure class="shot light"><img src="out/planetary-routes-transparent.png" alt="Planetary routes" loading="lazy"></figure>
         <div class="body">
           <div class="idx">08 · globe</div>
@@ -366,7 +385,7 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
 </code></pre></details>
         </div>
       </article>
-      <article class="card">
+      <article class="card" data-family="glyph field" data-search="tensor glyphs how do principal directions vary through a volume? pyvista tensor glyphs advanced 09 · glyph field glyph field">
         <figure class="shot light"><img src="out/tensor-glyphs-transparent.png" alt="Tensor glyphs" loading="lazy"></figure>
         <div class="body">
           <div class="idx">09 · glyph field</div>
@@ -406,7 +425,7 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
 </code></pre></details>
         </div>
       </article>
-      <article class="card">
+      <article class="card" data-family="branching tubes" data-search="vascular tree how does radius taper through a branching vessel tree? pyvista vascular biomedical advanced 10 · branching tubes branching tubes">
         <figure class="shot light"><img src="out/vascular-tree-transparent.png" alt="Vascular tree" loading="lazy"></figure>
         <div class="body">
           <div class="idx">10 · branching tubes</div>
@@ -438,7 +457,7 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
 </code></pre></details>
         </div>
       </article>
-      <article class="card">
+      <article class="card" data-family="volume slices" data-search="seismic slices where do layered signals break across a fault? pyvista seismic slices advanced 11 · volume slices volume slices">
         <figure class="shot light"><img src="out/seismic-slices-transparent.png" alt="Seismic slices" loading="lazy"></figure>
         <div class="body">
           <div class="idx">11 · volume slices</div>
@@ -471,7 +490,7 @@ footer code{background:var(--chip);border-radius:4px;padding:2px 6px;
 </code></pre></details>
         </div>
       </article>
-      <article class="card">
+      <article class="card" data-family="3D flow scene" data-search="urban airflow how do wind corridors pass through a building canopy? pyvista urban airflow advanced 12 · 3d flow scene 3d flow scene">
         <figure class="shot light"><img src="out/urban-airflow-transparent.png" alt="Urban airflow" loading="lazy"></figure>
         <div class="body">
           <div class="idx">12 · 3D flow scene</div>
@@ -534,5 +553,38 @@ BUILDERS = {
     <code>out/</code>, so open this file straight from the checkout.
   </footer>
 </div>
+<script>
+(function(){
+  var q=document.getElementById('q'),count=document.getElementById('count'),empty=document.getElementById('empty');
+  var cards=[].slice.call(document.querySelectorAll('.card'));
+  var chips=[].slice.call(document.querySelectorAll('.chip'));
+  var family='';
+  function apply(){
+    var t=q.value.trim().toLowerCase(),n=0;
+    for(var i=0;i<cards.length;i++){
+      var c=cards[i];
+      var ok=(!family||c.getAttribute('data-family')===family)&&
+             (!t||(c.getAttribute('data-search')||'').indexOf(t)>=0);
+      c.style.display=ok?'':'none';
+      if(ok)n++;
+    }
+    count.value=n+' / '+cards.length+' shown';
+    empty.hidden=n>0;
+    for(var j=0;j<chips.length;j++){
+      var ch=chips[j];
+      ch.setAttribute('aria-pressed',String(ch.getAttribute('data-family')===family));
+    }
+  }
+  q.addEventListener('input',apply);
+  chips.forEach(function(ch){
+    ch.addEventListener('click',function(){
+      var f=ch.getAttribute('data-family');
+      family=(f===family)?'':f;
+      apply();
+    });
+  });
+  apply();
+})();
+</script>
 </body>
 </html>

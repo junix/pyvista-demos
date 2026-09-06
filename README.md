@@ -2,6 +2,8 @@
 
 Twelve scientific 3D reference scenes rendered off-screen through PyVista/VTK, with transparent PNG as the primary artifact.
 
+Browse every demo with its source in **[gallery.html](gallery.html)** — searchable, follows your light/dark theme.
+
 `catalog.json` records the scientific use, question, visual family, complexity, and data/renderer tags.
 
 | Terrain | Vortex | Waves | Gyroid |
